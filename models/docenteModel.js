@@ -1,7 +1,7 @@
 import { sequelize } from "../config/confSequelize.js";
 import { DataTypes } from "sequelize";
 import { carrera } from "./carreraModel.js";
-
+import bcrypt from "bcrypt";
 
 export const docente = sequelize.define(
   "docente",
@@ -49,5 +49,16 @@ export const docente = sequelize.define(
 );
 
 docente.belongsTo(carrera, {foreignKey: 'nombreCarrera' , targetKey: 'nombreCarrera'});
+
+docente.beforeCreate(async (docente, options) => {
+  if (docente.claveDocente) {
+    try {
+      const hashedPassword = await bcrypt.hash(docente.claveDocente, 10);
+      docente.claveDocente = hashedPassword;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+});
 
 //docente.sync()

@@ -1,5 +1,6 @@
 import { sequelize } from "../config/confSequelize.js";
 import { DataTypes } from "sequelize";
+import bcrypt from "bcrypt";
 
 export const administrador = sequelize.define(
     "administrador",
@@ -34,6 +35,17 @@ export const administrador = sequelize.define(
     }
 
 );
+
+administrador.beforeCreate( async (administrador, options) => {
+    if(administrador.claveAdministrador){
+        try {
+            const hashedPassword = await bcrypt.hash(administrador.claveAdministrador, 10);
+            administrador.claveAdministrador = hashedPassword;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+});
 
 //administrador.sync()
 

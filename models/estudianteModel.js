@@ -1,5 +1,6 @@
 import { sequelize } from "../config/confSequelize.js";
 import { DataTypes } from "sequelize";
+import bcrypt from "bcrypt";
 
 export const estudiante = sequelize.define(
     "estudiante",
@@ -47,3 +48,15 @@ export const estudiante = sequelize.define(
 )
 
 //estudiante.sync();
+
+
+estudiante.beforeCreate( async (estudiante, options) => {
+    if(estudiante.claveEstudiante){
+        try {
+            const hashedPassword = await bcrypt.hash(estudiante.claveEstudiante, 10);
+            estudiante.claveEstudiante = hashedPassword;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+});
