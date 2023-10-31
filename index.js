@@ -9,6 +9,7 @@ import docenteRouter from "./routes/docente.route.js";
 import administradorRouter from "./routes/administrador.route.js";
 import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
+import tokenRouter from "./routes/token.route.js";
 
 
 
@@ -22,6 +23,7 @@ app.use("/coordinador", coordinadorRouter);
 app.use("/administrador", administradorRouter);
 app.use("/jefeDepartamento", jefeDepartamentoRouter);
 app.use("/carreras", carrerasRouter);
+app.use("/token", tokenRouter);
 
 
 app.listen(process.env.PORT, () => console.log("Servidor Iniciado en el puerto ", process.env.PORT));
