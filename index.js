@@ -10,11 +10,12 @@ import administradorRouter from "./routes/administrador.route.js";
 import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
 import tokenRouter from "./routes/token.route.js";
-
+import cors from "cors";
 
 
 
 const app = express();
+app.use(cors);
 app.use(express.json());
 app.use(cookieParser());
 app.use("/estudiante", estudianteRouter);
