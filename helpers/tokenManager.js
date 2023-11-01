@@ -22,9 +22,12 @@ export const generateRefreshJWT = (uid, res) => {
         
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: !(process.env.MODO === "developer"),
+            secure: true,
             expires: new Date(Date.now() + expiresIn * 1000),
+            sameSite: "none"
         })
+        
+        
         
     } catch (error) {
         console.log(error);

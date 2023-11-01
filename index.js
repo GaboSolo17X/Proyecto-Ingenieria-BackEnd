@@ -11,13 +11,36 @@ import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
 import tokenRouter from "./routes/token.route.js";
 import cors from "cors";
+const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
+
+
 
 
 
 const app = express();
-app.use(cors);
+
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            console.log("😲😲😲 =>", origin);
+            if (!origin || whiteList.includes(origin)) {
+                return callback(null, origin);
+            }
+            return callback(
+                "Error de CORS origin: " + origin + " No autorizado!"
+            );
+        },
+        credentials: true,
+    })
+);
+
+
 app.use(express.json());
 app.use(cookieParser());
+
+
+
+
 app.use("/estudiante", estudianteRouter);
 app.use("/docente", docenteRouter);
 app.use("/coordinador", coordinadorRouter);
