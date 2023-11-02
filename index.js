@@ -50,4 +50,4 @@ app.use("/carreras", carrerasRouter);
 app.use("/token", tokenRouter);
 
 
-app.listen(process.env.PORT, () => console.log("Servidor Iniciado en el puerto ", process.env.PORT));
+app.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
