@@ -6,13 +6,13 @@ import { comparePassword } from "../helpers/comparePassword.js";
 
 export const loginJefeDepartamento = async (req, res) => {
     try {
-        const { numeroEmpleadoDocente, claveJefe } = req.body;
-        let jefeDepartamentoLogin = await jefeDepartamento.findOne({where: {numeroEmpleadoDocente : numeroEmpleadoDocente}})
+        const { id, clave } = req.body;
+        let jefeDepartamentoLogin = await jefeDepartamento.findOne({where: {numeroEmpleadoDocente : id}})
         const  hashedPassword = jefeDepartamentoLogin.claveJefe;
         if (!jefeDepartamentoLogin) {
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
-        const respuestaPassword = comparePassword(claveJefe, hashedPassword);
+        const respuestaPassword = comparePassword(clave, hashedPassword);
         if(!respuestaPassword){
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }

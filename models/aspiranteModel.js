@@ -50,4 +50,4 @@ export const aspirante = sequelize.define(
     }
 );
 
-aspirante.sync()
+//aspirante.sync()
