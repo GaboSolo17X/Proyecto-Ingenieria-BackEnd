@@ -5,7 +5,7 @@ import { crearAspirante } from '../controllers/aspirante.controller.js';
 
 const router = express.Router();
 
-router.get("/sata", crearAspirante);
+router.post("/sata", crearAspirante);
 
 
 export default router;

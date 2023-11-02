@@ -4,6 +4,6 @@ import { loginJefeDepartamento } from '../controllers/jefeDepartamento.controlle
 
 const router = express.Router();
 
-router.get("/login", loginJefeDepartamento);
+router.post("/login", loginJefeDepartamento);
 
 export default router;

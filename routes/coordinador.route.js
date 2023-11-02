@@ -3,7 +3,7 @@ import { loginCoordinador } from '../controllers/coordinador.controller.js';
 
 const router = express.Router();
 
-router.get("/login", loginCoordinador);
+router.post("/login", loginCoordinador);
 
 
 export default router;
