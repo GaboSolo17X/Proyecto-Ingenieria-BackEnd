@@ -3,28 +3,28 @@ import "./config/confSequelize.js"
 import "./database/connectDB.js"
 import express from "express";
 import cookieParser from "cookie-parser";
-import aspiranteRouter from "./routes/aspirante.route.js";
+import cors from "cors";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+
 import estudianteRouter from "./routes/estudiante.route.js";
 import coordinadorRouter from "./routes/coordinador.route.js";
 import docenteRouter from "./routes/docente.route.js";
 import administradorRouter from "./routes/administrador.route.js";
 import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
-
-
-
 import tokenRouter from "./routes/token.route.js";
-import subidas from "./routes/subidas.route.js";
-import cors from "cors";
-import {aspirante} from "./models/aspiranteModel.js";
+import aspiranteRouter from "./routes/aspirante.route.js";
+
+
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
-
-
-
-
-
-
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use(
     cors({

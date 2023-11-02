@@ -42,6 +42,10 @@ export const aspirante = sequelize.define(
                 },
             }
         },
+        telefono: {
+            type: DataTypes.STRING(8),
+            allowNull: false,
+        },
 
         
     },
@@ -50,4 +54,4 @@ export const aspirante = sequelize.define(
     }
 );
 
-//aspirante.sync()
+aspirante.sync()
