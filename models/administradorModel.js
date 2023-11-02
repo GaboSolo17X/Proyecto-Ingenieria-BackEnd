@@ -18,7 +18,7 @@ export const administrador = sequelize.define(
             allowNull: false
         },
         identidad: {
-            type: DataTypes.STRING(13),
+            type: DataTypes.STRING(15),
             allowNull: false
         },
         claveAdministrador: {
@@ -47,5 +47,5 @@ administrador.beforeCreate( async (administrador, options) => {
     }
 });
 
-administrador.sync()
+//administrador.sync()
 

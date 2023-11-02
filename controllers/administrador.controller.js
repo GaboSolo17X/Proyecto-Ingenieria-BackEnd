@@ -7,13 +7,13 @@ import { comparePassword } from "../helpers/comparePassword.js";
 export const loginAdministrador = async (req, res) => {
 
     try {
-        const { numeroEmpleadoAdministrador, claveAdministrador } = req.body;
-        let administradorLogin = await administrador.findOne({where: {numeroEmpleadoAdministrador: numeroEmpleadoAdministrador}})
+        const { id, clave } = req.body;
+        let administradorLogin = await administrador.findOne({where: {numeroEmpleadoAdministrador: id}})
         const  hashedPassword = administradorLogin.claveAdministrador;
         if (!administradorLogin) {
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
-        const respuestaPassword = comparePassword(claveAdministrador, hashedPassword);
+        const respuestaPassword = await comparePassword(clave, hashedPassword);
         if(!respuestaPassword){
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }

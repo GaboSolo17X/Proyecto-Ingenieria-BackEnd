@@ -14,7 +14,7 @@ export const loginEstudiante = async (req, res) => {
         if (!estudianteLogin) {
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
-        const respuestaPassword = comparePassword(claveEstudiante, hashedPassword);
+        const respuestaPassword = await comparePassword(claveEstudiante, hashedPassword);
         if(!respuestaPassword){
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
