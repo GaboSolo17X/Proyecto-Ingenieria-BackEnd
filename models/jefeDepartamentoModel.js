@@ -33,4 +33,4 @@ jefeDepartamento.beforeCreate( async (jefeDepartamento, options) => {
     }
 });
 
-//jefeDepartamento.sync();
+jefeDepartamento.sync();

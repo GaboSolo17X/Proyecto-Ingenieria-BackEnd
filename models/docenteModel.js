@@ -61,4 +61,4 @@ docente.beforeCreate(async (docente, options) => {
   }
 });
 
-//docente.sync()
+docente.sync()

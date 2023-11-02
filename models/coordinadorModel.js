@@ -33,4 +33,4 @@ cordinadorDocente.beforeCreate( async (cordinadorDocente, options) => {
     }
 });
 
-//cordinadorDocente.sync();
+cordinadorDocente.sync();
