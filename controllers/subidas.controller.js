@@ -45,7 +45,7 @@ export const subirArchivo = async (req,res) => {
                 //Especificaciones del correo a enviar
                 const mailOptions = {
                 from: 'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
-                to: process.env.EMAIL_USER+"+"+useNombre+"@gmail.com",
+                to: "weslinmbc"+"+"+useNombre+"@gmail.com",
                 subject: 'Usted aprovo el examen de admision',
                 Text: `Espero que se encuentre muy bien ${useNombre}, le informamos que usted aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}`,
                 html: `<h1>Espero que se encuentre muy bien ${useNombre}</h1><p>le informamos que usted aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}</p>`,
@@ -58,7 +58,7 @@ export const subirArchivo = async (req,res) => {
                 //Especificaciones del correo a enviar
                 const mailOptions = {
                     from: 'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
-                    to: process.env.EMAIL_USER+"+"+useNombre+"@gmail.com",
+                    to: "weslinmbc"+"+"+useNombre+"@gmail.com",
                     subject: 'Usted no aprovo el examen de admision',
                     Text: `Espero que se encuentre muy bien ${useNombre}, le informamos que usted no aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}`,
                     html: `<h1>Espero que se encuentre muy bien ${useNombre}</h1><p>le informamos que usted no aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}</p>`,

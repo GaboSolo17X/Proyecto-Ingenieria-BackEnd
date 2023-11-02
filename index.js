@@ -6,8 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-
+import subidas from "./routes/subidas.route.js";
 import estudianteRouter from "./routes/estudiante.route.js";
 import coordinadorRouter from "./routes/coordinador.route.js";
 import docenteRouter from "./routes/docente.route.js";
