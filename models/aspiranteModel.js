@@ -5,7 +5,7 @@ export const aspirante = sequelize.define(
     "aspirante",
     {
         identidad: {
-            type: DataTypes.STRING(13),
+            type: DataTypes.STRING(15),
             primaryKey: true,
         },
         nombres: {

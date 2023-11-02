@@ -19,7 +19,7 @@ export const docente = sequelize.define(
       allowNull: false,
     },
     identidad: {
-      type: DataTypes.STRING(13),
+      type: DataTypes.STRING(15),
       allowNull: false,
     },
     foto: {

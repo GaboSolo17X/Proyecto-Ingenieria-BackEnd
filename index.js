@@ -9,10 +9,14 @@ import docenteRouter from "./routes/docente.route.js";
 import administradorRouter from "./routes/administrador.route.js";
 import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
+<<<<<<< HEAD
+import {aspirante} from "./models/aspiranteModel.js";
+=======
 import tokenRouter from "./routes/token.route.js";
 import cors from "cors";
 import {aspirante} from "./models/aspiranteModel.js";
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
+>>>>>>> 79b7b16c768ea8577e1c9e5824e05701c6cef40e
 
 
 
