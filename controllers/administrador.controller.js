@@ -13,7 +13,7 @@ export const loginAdministrador = async (req, res) => {
         if (!administradorLogin) {
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
-        const respuestaPassword = comparePassword(clave, hashedPassword);
+        const respuestaPassword = await comparePassword(clave, hashedPassword);
         if(!respuestaPassword){
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }

@@ -12,7 +12,7 @@ export const loginJefeDepartamento = async (req, res) => {
         if (!jefeDepartamentoLogin) {
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
-        const respuestaPassword = comparePassword(clave, hashedPassword);
+        const respuestaPassword = await comparePassword(clave, hashedPassword);
         if(!respuestaPassword){
             return res.status(400).json({ message: "Credenciales Incorrectas" });
         }
