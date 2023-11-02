@@ -47,7 +47,7 @@ export const estudiante = sequelize.define(
     }
 )
 
-//estudiante.sync();
+estudiante.sync();
 
 
 estudiante.beforeCreate( async (estudiante, options) => {

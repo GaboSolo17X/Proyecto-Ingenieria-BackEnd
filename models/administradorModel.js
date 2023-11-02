@@ -47,5 +47,5 @@ administrador.beforeCreate( async (administrador, options) => {
     }
 });
 
-administrador.sync()
+//administrador.sync()
 
