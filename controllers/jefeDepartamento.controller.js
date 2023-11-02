@@ -23,7 +23,7 @@ export const loginJefeDepartamento = async (req, res) => {
         return res.status(200).json({ message: "Login exitoso", token, expiresIn });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Error en el servidor" });
+        return res.status(500).json({ message: "Error en el servidor" });
         
     }
 }
