@@ -9,6 +9,8 @@ import docenteRouter from "./routes/docente.route.js";
 import administradorRouter from "./routes/administrador.route.js";
 import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
+import {aspirante} from "./models/aspiranteModel.js";
+
 
 
 
