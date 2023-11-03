@@ -1,13 +1,12 @@
 import "dotenv/config";
 import "./config/confSequelize.js"
 import "./database/connectDB.js"
-import  express from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-
+import subidas from "./routes/subidas.route.js";
 import estudianteRouter from "./routes/estudiante.route.js";
 import coordinadorRouter from "./routes/coordinador.route.js";
 import docenteRouter from "./routes/docente.route.js";
@@ -47,7 +46,7 @@ app.use(cookieParser());
 
 
 
-
+app.use("/aspirante", aspiranteRouter);
 app.use("/estudiante", estudianteRouter);
 app.use("/docente", docenteRouter);
 app.use("/coordinador", coordinadorRouter);
@@ -55,7 +54,9 @@ app.use("/administrador", administradorRouter);
 app.use("/jefeDepartamento", jefeDepartamentoRouter);
 app.use("/carreras", carrerasRouter);
 app.use("/token", tokenRouter);
-app.use("/aspirante", aspiranteRouter);
+
+// Para recibir archivos, procesarlo y enviarl los correos
+app.use("/upload", subidas);
 
 
-app.listen(process.env.PORT, () => console.log("Servidor Iniciado en el puerto ", process.env.PORT));
+app.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
