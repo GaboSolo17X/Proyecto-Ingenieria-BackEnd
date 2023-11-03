@@ -36,6 +36,7 @@ export const createAspirante = async (req, res) => {
         return res.status(200).json({ message: "Aspirante creado", aspirante: savedAspirante});
         
     } catch (error) {
+        console.log(error)
         error.message = "Error al crear el aspirante";
         return res.status(500).json({ message: error.message });
     }
