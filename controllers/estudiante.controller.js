@@ -31,3 +31,11 @@ export const loginEstudiante = async (req, res) => {
         
     }
 };
+
+
+export const addEstudiante = async (req, res) => {
+    /*
+    Controlador para añadir estudiantes 
+    TODO: hacerlo desde el archivo csv que un no se ha creado
+    */ 
+};

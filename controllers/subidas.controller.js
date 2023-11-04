@@ -1,7 +1,129 @@
 import multer from "multer";
 import csv from 'csvtojson';
 import mailer from '../config/confMailer.js';
-import { forEach } from "underscore";
+import fs from 'fs';
+import { json2csv } from 'json-2-csv';
+import { forEach, where } from "underscore";
+import { aspirante } from "../models/aspiranteModel.js"
+import { estudiante } from "../models/estudianteModel.js";
+import { createObjectCsvWriter } from "csv-writer";
+import bcrypt from "bcryptjs";
+
+async function infoAspirante(id){
+    try {
+        /*
+        Funcion para obtener los datos del aspirante
+        Id: la idea del aspirante
+        return: un json con los datos del aspirante
+        datos que contiene el json:
+            Nombre completo,
+            Identidad,
+            Carrera a la que pertenece, 
+            Dirección,
+            Correo personal,
+            Centro al que pertenece
+        */1
+        if(id === undefined){
+            return res.status(400).json({ message: "No se envio una identidad" });
+        }
+
+        //buscar al aspirante en la base de datos
+        const aspirantes = await aspirante.findOne({where: { identidad: id },});
+        //creacion del json
+        const jsonAspirante = {}
+        //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
+        jsonAspirante["nombre"] = aspirantes.dataValues.nombres+" "+aspirantes.dataValues.apellidos;
+        jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
+        jsonAspirante["carrera"] = aspirantes.dataValues.carreraPrincipal;
+        jsonAspirante["direccion"] = "sitio random de hondruas";
+        jsonAspirante["correo"] = aspirantes.dataValues.correoPersonal;
+        jsonAspirante["centro"] = aspirantes.dataValues.centroRegional;
+
+        //retornar el json
+        return jsonAspirante;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+async function addAprovado(aspirantes,countestudiante){
+    /*
+    funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
+    La mayor parte de la info se saca de la base de datos
+    */
+    console.log(aspirantes);
+    try {
+        const fecha = new Date();
+        let numeroCuenta = "";
+        
+        //deliminacion para el numero de cuenta estructura <año><periodo de examen><#estudiante>
+        if (countestudiante <= 9) {
+                numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "000" +
+            countestudiante.toString();
+        }
+        if (countestudiante <= 99) {
+            numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "00" +
+            countestudiante.toString();
+        }
+        if (countestudiante >= 99 && countestudiante <= 999) {
+            numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "0" +
+            countestudiante.toString();
+        }
+        if (countestudiante >= 999) {
+            numeroCuenta =
+            fecha.getFullYear().toString() + "100" + countestudiante.toString();
+        }
+        if (countestudiante === 0) {
+            numeroCuenta =
+            fecha.getFullYear().toString() + "100" + "0001";
+        }
+        
+        //creacion del estudiante
+        const newEstudiante = new estudiante({
+            numeroCuenta : numeroCuenta,
+            nombres : aspirantes.Nombre,
+            apellidos : aspirantes.Nombre.split(" ")[2] + " " + aspirantes.Nombre.split(" ")[3],
+            identidad : aspirantes.Identidad,
+            carrera : aspirantes.Carrera,
+            direccion : "sitio random de hondruas",
+            correoPersonal : aspirantes.CorreoPersonal,
+            centroRegional : aspirantes.Centro,
+            claveEstudiante : aspirantes.Identidad,
+        });
+
+        //guardado del estudiante en la base de datos
+        const savedEstudiante = await newEstudiante.save();
+        
+    } catch (error) {
+        console.log(error);
+
+    }
+};
+
+async function enviarCorreo(aspirante,info){
+    //funcion para elementos generico de envio de correo
+    try {
+        const mailOptions = {
+            from:       'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
+            to:         `${aspirante.correo}`,
+            subject:    info.asunto,
+            Text:       info.texto,
+            html:       info.html,
+        };
+        await mailer.sendMail(mailOptions);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
 //configuracion de multer para subir archivos
@@ -15,6 +137,7 @@ const storage = multer.diskStorage({
     }
 });
 
+
 //inicializacion de multer con la configuracion de arriba
 const upload = multer({ storage:storage });
 
@@ -23,53 +146,165 @@ export const subir = upload.single("usrfile");
 
 export const subirArchivo = async (req,res) => {
     try {
-
-        //procesamiento del archivo csv a un json con modulo csvtojson
+        
+        /*procesamiento del archivo csv a un json con modulo csvtojson
+        columnas en csv: Identidad,NotaPAA,TipoExamen,NotaExamen*/
+        const direccion = `util/${Date.now()}-AspirantesAprobados.csv`
         const csvFilePath = `uploads/${req.file.filename}`;
         const jsonArray = await csv().fromFile(csvFilePath);
+        const jsonArrayAprove = [];
+        //let ultimoEstudiante = await estudiante.count()
+        
         req.body.jsonArray = jsonArray;
 
-        console.log(jsonArray);
+
+    
 
         // foreach para ejecutar el enviar el correo a cada aspiraten
         forEach(jsonArray, async (aspirante) => {
-            const useNombre = aspirante["nombre"];
-            const useCorreo = aspirante["correo"];
-            const useNota = aspirante["nota"];
+            const Identidad = aspirante["Identidad"];
+            const notaPAA = aspirante["NotaPAA"];
+            const tipoExamen = aspirante["TipoExamen"];
+            const notaExamen = aspirante["NotaExamen"];
+            const tipo = (tipoExamen === undefined && notaExamen === undefined);
+            const aspiranteInfo = await infoAspirante(Identidad);
+            
+            console.log(aspiranteInfo.nombre);
+            //comprobacion de que el aspirante tenga un examen aparte de la paa y eparacion de estudiante segun el examen que tenga
+            //hacer un mensaje generico para cuando no pase examen y por tanto eviar
 
-            //Seleccion entre tipo de estudiante si paso o no con mensaje personalizado
-            if(useNota >= 70){
-
-                //Añadir a base de datos
-
-
-                //Especificaciones del correo a enviar
-                const mailOptions = {
-                from: 'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
-                to: "weslinmbc"+"+"+useNombre+"@gmail.com",
-                subject: 'Usted aprovo el examen de admision',
-                Text: `Espero que se encuentre muy bien ${useNombre}, le informamos que usted aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}`,
-                html: `<h1>Espero que se encuentre muy bien ${useNombre}</h1><p>le informamos que usted aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}</p>`,
-            };
-            await mailer.sendMail(mailOptions); 
-
-            }
-
-            if(useNota < 70){
-                //Especificaciones del correo a enviar
-                const mailOptions = {
-                    from: 'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
-                    to: "weslinmbc"+"+"+useNombre+"@gmail.com",
-                    subject: 'Usted no aprovo el examen de admision',
-                    Text: `Espero que se encuentre muy bien ${useNombre}, le informamos que usted no aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}`,
-                    html: `<h1>Espero que se encuentre muy bien ${useNombre}</h1><p>le informamos que usted no aprovo el examen de admision con una nota de ${useNota} para la carrera de ${aspirante["carrera"]}</p>`,
+            //Solo necesito hacer paa
+            if (tipo) {
+                if(notaPAA >= 70 ){
+                    //aprovado
+                    //añadidos al json
+                    jsonArrayAprove.push(aspiranteInfo);                
+                    await enviarCorreo(
+                        aspiranteInfo,
+                        {
+                            asunto:"Aprobado",
+                            texto:"Felicidades, has aprobado el examen de admision",
+                            html:
+                            `
+                            <h1>Felicidades ${aspiranteInfo.nombre}, has aprobado el examen de admision</h1>
+                            <h2> Esperamos que te encuentres muy bien nos alegra informarte que has sido aprovado el examen de admision y has sido aceptado en la carrera de ${aspiranteInfo.carrera} con los siguientes resultados</h2>    
+                            <h2>Nota PAA: ${notaPAA}</h2>
+                            
+                            <h2>Te esperamos en el centro regional ${aspiranteInfo.centro}</h2>
+                            `
+                        }
+)
                 };
-                //Accion para enviar directamente el correo
-                await mailer.sendMail(mailOptions); 
-                
+                if(notaPAA < 70){
+                //no aprovado
+                await enviarCorreo(
+                    aspiranteInfo,
+                    {
+                        asunto:"Examen de admision",
+                        texto:"Lamentamos informate que no has aprobado el examen de admision",
+                        html:
+                        `
+                            <h1>Un gusto saludarte ${aspiranteInfo.nombre}, lamentamos informate que no has aprobado el examen de admision</h1>
+                            <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrerae te esperamos que lo logros en otra ocsaion</h2>    
+                            <h2>Nota PAA: ${notaPAA}</h2>
+                            
+                            <h2>Te esperamos en los proximos examenes un fallo es el camino al exito</h2>
+                            `
+                    })
+                }
+            }    
+
+
+            //Necesito hacer dos examenes
+            if (!tipo) {
+                if(notaPAA>70 && notaExamen>70){
+                    //aprobo ambos examenes 
+                    //añadir estudiante
+                    jsonArrayAprove.push(aspiranteInfo);
+                    //envio de correo
+                    await enviarCorreo(
+                        aspiranteInfo,
+                        {
+                            asunto:"Aprobado",
+                            texto:"Felicidades, has aprobado el examen de admision",
+                            html:
+                            `
+                            <h1>Felicidades ${aspiranteInfo.nombre}, has aprobado el examen de admision</h1>
+                            <h2> Esperamos que te encuentres muy bien nos alegra informarte que has sido aprovado el examen de admision y has sido aceptado en la carrera de ${aspiranteInfo.carrera} con los siguientes resultados</h2>    
+                            <h2>Nota PAA: ${notaPAA}</h2>
+                            <h2>Nota examen de carrera: ${notaExamen}</h2>
+                            
+                            <h2>Te esperamos en el centro regional ${aspiranteInfo.centro}</h2>
+                            `
+                        })
+                }
+                if(notaPAA>70 && notaExamen<70){
+                    //aprobo paa pero no examen
+    
+                    //añadido de estudiante al json
+                    jsonArrayAprove.push(aspiranteInfo);
+
+                    //envio de correo
+                    await enviarCorreo(
+                        aspiranteInfo,
+                        {
+                            asunto:"Examen de admision",
+                            texto:"Felicidades, has aprobado el examen de admision",
+                            html:
+                            `
+                            <h1>Un gusto saludarte ${aspiranteInfo.nombre}, te tenemos noticias</h1>
+                            <h2> Esperamos que te encuentres muy bien nos tenemos que informarte que no has sido aceptado en la carrera de ${aspirante.carrera} por una baja nota en el examen de la misma pero has sido aceptado en tu segunda opcion</h2>    
+                            <h2>Nota PAA: ${notaPAA}</h2>
+                            <h2>Nota examen de carrera: ${notaExamen}</h2>
+                            
+                            <h2>Te esperamos en el centro regional ${aspiranteInfo.centro}</h2>
+                            `
+                        })
+    
+                }
+                if(notaPAA<70 && notaExamen<70){
+                    //no aprovado
+                    //envio de correo
+                    await enviarCorreo(
+                        aspiranteInfo,
+                    {
+                        asunto:"Examen de admision",
+                        texto:"Lamentamos informate que no has aprobado el examen de admision",
+                        html:
+                        `
+                            <h1>Un gusto saludarte <strong>${aspiranteInfo.nombre}<strong>, lamentamos informate que no has aprobado el examen de admision</h1>
+                            <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrerae te esperamos que lo logros en otra ocsaion</h2>    
+                            <h2>Nota PAA: ${notaPAA}</h2>
+                            <h2>Nota examen de carrera: ${notaExamen}</h2>
+                            
+                            <h2>Te esperamos en los proximos examenes un fallo es el camino al exito</h2>
+                            `
+                    })
+                }
             }
+            
+            
+            //console.log(jsonArrayAprove);
+            
+            const csvWriter = createObjectCsvWriter({
+                path: direccion,
+                header: [
+                    {id: 'nombre', title: 'Nombre'},
+                    {id: 'Identidad', title: 'Identidad'},
+                    {id: 'carrera', title: 'Carrera'},
+                    {id: 'correo', title: 'CorreoPersonal'},
+                    {id: 'centro', title: 'Centro'}
+                ]
+            });
+
+            csvWriter.writeRecords(jsonArrayAprove)    
+                .then(() => {
+                    console.log('...Done');
+                }).catch((err) => {console.log(err)});
+            
         });
-        return res.status(200).json({ Archivos: "Archivo subido", Correos:"correos enviados a estudiantes" });
+
+        return res.status(200).json({ Archivos: "Archivo subido",AspirantesCSV:"creado",Correos:"correos enviados a estudiantes" });
     } catch (error) {
         return res.status(500).json({ message: error });
     }
@@ -77,3 +312,40 @@ export const subirArchivo = async (req,res) => {
 };
 
 
+
+
+export const creacionEstudiantes = async (req,res) => {
+    /*
+    recibe csv-> lo paso a json ->de cada estudiante que paso saco si sus datos -> creo el estudiante -> guardo el estudiante en la base de datos
+    */
+   try {
+        //direccion de origen del archivo csv
+        const csvFilePath = `uploads/${req.file.filename}`;
+        //conversion del archivo csv a json
+        const jsonArray = await csv().fromFile(csvFilePath);
+        let cuenta = await estudiante.count()
+        forEach(jsonArray, async (aspirante) => {
+            console.log(aspirante);
+            cuenta++;
+            addAprovado(aspirante,cuenta);
+        });   
+        return res.status(200).json({ message: "Estudiantes creados" });
+    } catch (error) {
+        console.log("Hubo un error el cual fue: ",error);
+        return res.status(500).json({ message: error });
+    }  
+};
+
+
+
+//inutil
+export const hash = async (req,res) => {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash("perroloco2",salt);
+        return res.status(200).json({ hash: hash });
+
+    } catch (error) {
+        return res.status(500).json({ message: error });
+    }
+};

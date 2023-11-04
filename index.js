@@ -28,7 +28,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(
     cors({
         origin: function (origin, callback) {
-            console.log("😲😲😲 =>", origin);
+            //console.log("😲😲😲 =>", origin);
             if (!origin || whiteList.includes(origin)) {
                 return callback(null, origin);
             }
