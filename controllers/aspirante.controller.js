@@ -65,8 +65,8 @@ export const getAspirantes = async (req, res) => {
 
 
     } catch (error) {
-        error.message = "Error al obtener los aspirantes";
-        return res.status(500).json({ message: error.message });
+        //error.message = "Error al obtener los aspirantes";
+        return res.status(500).json({ message: error });
     }
 }
 
