@@ -34,10 +34,18 @@ export const carrera = sequelize.define(
         },
       },
     },
+    notaMinEx: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    notaMinPAA: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     timestamps: false,
   }
 );
 
-//carrera.sync();
+carrera.sync();
