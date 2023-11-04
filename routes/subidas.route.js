@@ -1,9 +1,12 @@
 import  Express  from "express";
-import {subir,subirArchivo,fecha} from "../controllers/subidas.controller.js";
+import {subir,subirArchivo,hash,creacionEstudiantes} from "../controllers/subidas.controller.js";
 
 const router = Express.Router();
 
 router.post("/subircsv",subir,subirArchivo);
-router.get("/fecha",fecha)
+router.post("/creacion",subir,creacionEstudiantes)
+
+//utilidad para Gabo
+router.get("/hash",hash)
 
 export default router;
