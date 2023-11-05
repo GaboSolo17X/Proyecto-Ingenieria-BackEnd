@@ -33,9 +33,32 @@ export const loginEstudiante = async (req, res) => {
 };
 
 
-export const addEstudiante = async (req, res) => {
-    /*
-    Controlador para añadir estudiantes 
-    TODO: hacerlo desde el archivo csv que un no se ha creado
-    */ 
+export const getEstudiantes = async (req, res) => {
+try {
+    if(await estudiante.count() === 0){
+        return res.status(400).json({ message: "No hay estudiantes registrados" });
+    }
+    return res.status(200).json(await estudiante.findAll());
+} catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error en el servidor" });
+}
 };
+
+
+
+export const getEstudianteByCuenta = async (req, res) => {
+try {
+    const { id } = req.params;
+    const estudianteEspecifico = await estudiante.findOne({where: {numeroCuenta: id}})
+    if(!estudianteEspecifico){
+        return res.status(400).json({ message: "El estudiante no existe" });
+    }
+    return res.status(200).json(estudianteEspecifico);
+} catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error en el servidor" });
+}
+};
+
+
