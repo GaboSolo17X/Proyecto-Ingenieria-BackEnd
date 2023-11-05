@@ -168,6 +168,13 @@ export const subirArchivo = async (req,res) => {
             const notaExamen = aspirante["NotaExamen"];
             const tipo = (tipoExamen === undefined && notaExamen === undefined);
             const aspiranteInfo = await infoAspirante(Identidad);
+
+            if(aspiranteInfo === undefined){
+                return res.status(400).json({ message: "No se encontro al aspirante" });
+            }
+            if(notaPAA === undefined){
+                return res.status(400).json({ message: `No se encontro nota de la PAA para el estudiante con identidad ${identidad}`});
+            }
             
             console.log(aspiranteInfo.nombre);
             //comprobacion de que el aspirante tenga un examen aparte de la paa y eparacion de estudiante segun el examen que tenga
