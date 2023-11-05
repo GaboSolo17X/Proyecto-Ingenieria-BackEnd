@@ -7,6 +7,7 @@ import { forEach, where } from "underscore";
 import { aspirante } from "../models/aspiranteModel.js"
 import { estudiante } from "../models/estudianteModel.js";
 import { createObjectCsvWriter } from "csv-writer";
+import { carrera } from "../models/carreraModel.js";
 import bcrypt from "bcryptjs";
 
 async function infoAspirante(id){
@@ -31,6 +32,7 @@ async function infoAspirante(id){
         const aspirantes = await aspirante.findOne({where: { identidad: id },});
         //creacion del json
         const jsonAspirante = {}
+        
         //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
         jsonAspirante["nombre"] = aspirantes.dataValues.nombres+" "+aspirantes.dataValues.apellidos;
         jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
@@ -167,7 +169,13 @@ export const subirArchivo = async (req,res) => {
             const tipoExamen = aspirante["TipoExamen"];
             const notaExamen = aspirante["NotaExamen"];
             const tipo = (tipoExamen === undefined && notaExamen === undefined);
+            
             const aspiranteInfo = await infoAspirante(Identidad);
+            let notaMinCarrera = await carrera.findOne({where: { nombreCarrera: aspiranteInfo.carrera}});
+            notaMinCarrera = notaMinCarrera.dataValues.notaMinPAA;
+            let notaMinExamenCarrera = await carrera.findOne({where: { nombreCarrera: aspiranteInfo.carrera}});
+            notaMinExamenCarrera = notaMinExamenCarrera.dataValues.notaMinEx;
+
 
             if(aspiranteInfo === undefined){
                 return res.status(400).json({ message: "No se encontro al aspirante" });
@@ -176,13 +184,12 @@ export const subirArchivo = async (req,res) => {
                 return res.status(400).json({ message: `No se encontro nota de la PAA para el estudiante con identidad ${identidad}`});
             }
             
-            console.log(aspiranteInfo.nombre);
             //comprobacion de que el aspirante tenga un examen aparte de la paa y eparacion de estudiante segun el examen que tenga
             //hacer un mensaje generico para cuando no pase examen y por tanto eviar
 
             //Solo necesito hacer paa
             if (tipo) {
-                if(notaPAA >= 70 ){
+                if(notaPAA >= notaMinCarrera ){
                     //aprovado
                     //añadidos al json
                     jsonArrayAprove.push(aspiranteInfo);                
@@ -202,7 +209,7 @@ export const subirArchivo = async (req,res) => {
                         }
 )
                 };
-                if(notaPAA < 70){
+                if(notaPAA < notaMinCarrera){
                 //no aprovado
                 await enviarCorreo(
                     aspiranteInfo,
@@ -224,7 +231,7 @@ export const subirArchivo = async (req,res) => {
 
             //Necesito hacer dos examenes
             if (!tipo) {
-                if(notaPAA>70 && notaExamen>70){
+                if(notaPAA>notaMinCarrera && notaExamen>notaMinExamenCarrera){
                     //aprobo ambos examenes 
                     //añadir estudiante
                     jsonArrayAprove.push(aspiranteInfo);
@@ -245,7 +252,7 @@ export const subirArchivo = async (req,res) => {
                             `
                         })
                 }
-                if(notaPAA>70 && notaExamen<70){
+                if(notaPAA>notaMinCarrera && notaExamen<notaMinExamenCarrera){
                     //aprobo paa pero no examen
     
                     //añadido de estudiante al json
@@ -269,7 +276,7 @@ export const subirArchivo = async (req,res) => {
                         })
     
                 }
-                if(notaPAA<70 && notaExamen<70){
+                if(notaPAA<notaMinCarrera && notaExamen<notaMinExamenCarrera){
                     //no aprovado
                     //envio de correo
                     await enviarCorreo(
@@ -291,7 +298,7 @@ export const subirArchivo = async (req,res) => {
             }
             
             
-            //console.log(jsonArrayAprove);
+            
             
             const csvWriter = createObjectCsvWriter({
                 path: direccion,
