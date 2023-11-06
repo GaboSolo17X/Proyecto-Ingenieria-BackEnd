@@ -38,14 +38,10 @@ export const subirArchivo = async (req, res) => {
     const jsonArray = await csv().fromFile(csvFilePath);
     const jsonArrayAprove = [];
     //let ultimoEstudiante = await estudiante.count()
-
     req.body.jsonArray = jsonArray;
-    const numeroRegistros = jsonArray.length;
-    let contador = 0;
 
     // foreach para ejecutar el enviar el correo a cada aspiraten
     forEach(jsonArray, async (aspirante) => {
-      contador++;
       const Identidad = aspirante["Identidad"];
       const notaPAA = aspirante["NotaPAA"];
       const tipoExamen = aspirante["TipoExamen"];
@@ -66,11 +62,9 @@ export const subirArchivo = async (req, res) => {
         return res.status(400).json({ message: "No se encontro al aspirante" });
       }
       if (notaPAA === undefined) {
-        return res
-          .status(400)
-          .json({
-            message: `No se encontro nota de la PAA para el estudiante con identidad ${identidad}`,
-          });
+        return res.status(400).json({
+          message: `No se encontro nota de la PAA para el estudiante con identidad ${identidad}`,
+        });
       }
 
       //comprobacion de que el aspirante tenga un examen aparte de la paa y eparacion de estudiante segun el examen que tenga
@@ -81,6 +75,7 @@ export const subirArchivo = async (req, res) => {
         if (notaPAA >= notaMinCarrera) {
           //aprovado
           //añadidos al json
+          aspiranteInfo.pasoCarreraPrincipal = true;
           jsonArrayAprove.push(aspiranteInfo);
           await enviarCorreo(aspiranteInfo, {
             asunto: "Aprobado",
@@ -116,6 +111,7 @@ export const subirArchivo = async (req, res) => {
         if (notaPAA > notaMinCarrera && notaExamen > notaMinExamenCarrera) {
           //aprobo ambos examenes
           //añadir estudiante
+          aspiranteInfo.pasoCarreraPrincipal = true;
           jsonArrayAprove.push(aspiranteInfo);
           //envio de correo
           await enviarCorreo(aspiranteInfo, {
@@ -133,7 +129,7 @@ export const subirArchivo = async (req, res) => {
         }
         if (notaPAA > notaMinCarrera && notaExamen < notaMinExamenCarrera) {
           //aprobo paa pero no examen
-
+          aspiranteInfo.pasoCarreraPrincipal = false;
           //añadido de estudiante al json
           jsonArrayAprove.push(aspiranteInfo);
 
@@ -178,8 +174,10 @@ export const subirArchivo = async (req, res) => {
               { id: "nombre", title: "Nombre" },
               { id: "Identidad", title: "Identidad" },
               { id: "carrera", title: "Carrera" },
+              { id: "carreraSecundaria", title: "CarreraSecundaria" },
               { id: "correo", title: "CorreoPersonal" },
               { id: "centro", title: "Centro" },
+              { id: "pasoCarreraPrincipal", title: "pasoCarreraPrincipal" },
             ],
           });
 
@@ -197,16 +195,12 @@ export const subirArchivo = async (req, res) => {
       await createCsvFile();
     });
 
-    if (contador === numeroRegistros) {
-      return res
-        .status(200)
-        .json({
-          Archivos: "Archivo subido",
-          AspirantesCSV: "creado",
-          Correos: "correos enviados a estudiantes",
-          direccion: direccion,
-        });
-    }
+    return res.status(200).json({
+      Archivos: "Archivo subido",
+      AspirantesCSV: "creado",
+      Correos: "correos enviados a estudiantes",
+      direccion: direccion,
+    });
   } catch (error) {
     return res.status(500).json({ message: error });
   }
@@ -240,9 +234,11 @@ async function infoAspirante(id) {
       aspirantes.dataValues.nombres + " " + aspirantes.dataValues.apellidos;
     jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
     jsonAspirante["carrera"] = aspirantes.dataValues.carreraPrincipal;
+    jsonAspirante["carreraSecundaria"] = aspirantes.dataValues.carreraSecundaria;
     jsonAspirante["direccion"] = "sitio random de hondruas";
     jsonAspirante["correo"] = aspirantes.dataValues.correoPersonal;
     jsonAspirante["centro"] = aspirantes.dataValues.centroRegional;
+    jsonAspirante["pasoCarreraPrincipal"] = aspirantes.dataValues.pasoCarreraPrincipal;
 
     //retornar el json
     return jsonAspirante;
@@ -254,7 +250,6 @@ async function infoAspirante(id) {
 async function enviarCorreo(aspirante, info) {
   //funcion para elementos generico de envio de correo
   try {
-    console.log(aspirante);
     const mailOptions = {
       from: "Admisiones" + "<" + process.env.EMAIL_USER + "@gmail.com" + ">",
       to: `${aspirante.correo}`,
@@ -279,7 +274,6 @@ export const creacionEstudiantes = async (req, res) => {
     const jsonArray = await csv().fromFile(csvFilePath);
     let cuenta = await estudiante.count();
     forEach(jsonArray, async (aspirante) => {
-      console.log(aspirante);
       cuenta++;
       addAprovado(aspirante, cuenta);
     });
@@ -295,10 +289,9 @@ async function addAprovado(aspirantes, countestudiante) {
     funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
     La mayor parte de la info se saca de la base de datos
     */
-  console.log(aspirantes);
   try {
     const fecha = new Date();
-    let claveEstudiante = ""
+    let claveEstudiante = "";
     let numeroCuenta = "";
 
     //deliminacion para el numero de cuenta estructura <año><periodo de examen><#estudiante>
@@ -331,34 +324,40 @@ async function addAprovado(aspirantes, countestudiante) {
       numeroCuenta = fecha.getFullYear().toString() + "100" + "0001";
     }
 
-
     //<centro><inicialnombre><numero 1-99><ultimos dos numeros de la identidad
     //cu,curl,vs
-    claveEstudiante = 
-        aspirantes.Centro.slice(-2)+
-        aspirantes.Nombre.slice(0,1)+
-        (Math.floor(Math.random() * 99) + 1).toString().padStart(2, '0')+
-        aspirantes.Identidad.slice(-2)
+    claveEstudiante =
+      aspirantes.Centro.slice(-2) +
+      aspirantes.Nombre.slice(0, 1) +
+      (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
+      aspirantes.Identidad.slice(-2);
 
+    let carreraSecundaria;
+    let carreraPrincipal;
+    if (aspirantes.pasoCarreraPrincipal == "true") {
+      carreraSecundaria = aspirantes.CarreraSecundaria;
+      carreraPrincipal = aspirantes.Carrera;
+    } else {
+      carreraSecundaria = null;
+      carreraPrincipal = aspirantes.CarreraSecundaria;
+    }
 
-    //creacion del estudiante
     const newEstudiante = new estudiante({
       numeroCuenta: numeroCuenta,
       nombres: aspirantes.Nombre,
       apellidos:
         aspirantes.Nombre.split(" ")[2] + " " + aspirantes.Nombre.split(" ")[3],
       identidad: aspirantes.Identidad,
-      carrera: aspirantes.Carrera,
+      carrera: carreraPrincipal,
       direccion: "sitio random de hondruas",
       correoPersonal: aspirantes.CorreoPersonal,
       centroRegional: aspirantes.Centro,
       claveEstudiante: claveEstudiante,
+      carreraSecundaria: carreraSecundaria,
     });
 
-
-
     //envio de correo al estudiante que se ha creado su cuenta
-    console.log(aspirante);
+
     const mailOptions = {
       from: "Registro" + "<" + process.env.EMAIL_USER + "@gmail.com" + ">",
       to: `${aspirantes.CorreoPersonal}`,
@@ -374,8 +373,6 @@ async function addAprovado(aspirantes, countestudiante) {
       `,
     };
     await mailer.sendMail(mailOptions);
-  
-
 
     //guardado del estudiante en la base de datos
     const savedEstudiante = await newEstudiante.save();

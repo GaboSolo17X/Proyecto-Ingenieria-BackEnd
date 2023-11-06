@@ -41,6 +41,11 @@ export const estudiante = sequelize.define(
             type: DataTypes.STRING(100),
             allowNull: false
         },
+        carreraSecundaria: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+            defaultValue: null, 
+        },
 
     },{
         timestamps: false,

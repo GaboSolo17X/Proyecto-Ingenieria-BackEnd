@@ -22,7 +22,7 @@ export const loginEstudiante = async (req, res) => {
         const { token, expiresIn } = generateJWT(estudianteLogin.numeroCuenta);
         generateRefreshJWT(estudianteLogin.numeroCuenta, res);
 
-        return res.status(200).json({ message: "Login exitoso", token, expiresIn });
+        return res.status(200).json({ message: "Login exitoso", token, expiresIn , estudianteLogin});
         
         
     } catch (error) {

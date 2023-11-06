@@ -19,6 +19,7 @@ export const createAspirante = async (req, res) => {
     try {
         const { identidad, nombres, apellidos, carreraPrincipal, carreraSecundaria, correoPersonal, centroRegional, telefono } = req.body;
         const fotoCertificado = req.file.path;
+        const pasoCarreraPrincipal = null;
 
         const newAspirante = new aspirante({
             identidad,
@@ -29,7 +30,8 @@ export const createAspirante = async (req, res) => {
             correoPersonal,
             centroRegional,
             telefono,
-            fotoCertificado
+            fotoCertificado,
+            pasoCarreraPrincipal
         });
 
         const savedAspirante = await newAspirante.save();

@@ -46,8 +46,11 @@ export const aspirante = sequelize.define(
             type: DataTypes.STRING(8),
             allowNull: false,
         },
-
-        
+        pasoCarreraPrincipal:{
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            defaultValue: null,
+        },
     },
     {
         timestamps: false,
