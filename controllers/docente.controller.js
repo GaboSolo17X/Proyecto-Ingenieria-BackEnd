@@ -68,6 +68,8 @@ export const registerDocente = async (req, res) => {
             numeroEmpleadoDocente++
         }
 
+
+        //<ultimos 5 digitos de la identidad><primer apellido><primer nombre>
         const claveDocente = identidad.slice(-5)+apellidos.split(" ")[0]+nombres.split(" ")[0];
         const newDocente = new docente({
             numeroEmpleadoDocente,
