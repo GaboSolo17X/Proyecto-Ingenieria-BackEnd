@@ -9,126 +9,10 @@ import { estudiante } from "../models/estudianteModel.js";
 import { createObjectCsvWriter } from "csv-writer";
 import { carrera } from "../models/carreraModel.js";
 import bcrypt from "bcryptjs";
+import path from "path";
 
-async function infoAspirante(id){
-    try {
-        /*
-        Funcion para obtener los datos del aspirante
-        Id: la idea del aspirante
-        return: un json con los datos del aspirante
-        datos que contiene el json:
-            Nombre completo,
-            Identidad,
-            Carrera a la que pertenece, 
-            Dirección,
-            Correo personal,
-            Centro al que pertenece
-        */1
-        if(id === undefined){
-            return res.status(400).json({ message: "No se envio una identidad" });
-        }
+/// SUBIR CSV
 
-        //buscar al aspirante en la base de datos
-        const aspirantes = await aspirante.findOne({where: { identidad: id },});
-        //creacion del json
-        const jsonAspirante = {}
-        
-        //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
-        jsonAspirante["nombre"] = aspirantes.dataValues.nombres+" "+aspirantes.dataValues.apellidos;
-        jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
-        jsonAspirante["carrera"] = aspirantes.dataValues.carreraPrincipal;
-        jsonAspirante["direccion"] = "sitio random de hondruas";
-        jsonAspirante["correo"] = aspirantes.dataValues.correoPersonal;
-        jsonAspirante["centro"] = aspirantes.dataValues.centroRegional;
-
-        //retornar el json
-        return jsonAspirante;
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-async function addAprovado(aspirantes,countestudiante){
-    /*
-    funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
-    La mayor parte de la info se saca de la base de datos
-    */
-    console.log(aspirantes);
-    try {
-        const fecha = new Date();
-        let numeroCuenta = "";
-        
-        //deliminacion para el numero de cuenta estructura <año><periodo de examen><#estudiante>
-        if (countestudiante <= 9) {
-                numeroCuenta =
-            fecha.getFullYear().toString() +
-            "100" +
-            "000" +
-            countestudiante.toString();
-        }
-        if (countestudiante <= 99) {
-            numeroCuenta =
-            fecha.getFullYear().toString() +
-            "100" +
-            "00" +
-            countestudiante.toString();
-        }
-        if (countestudiante >= 99 && countestudiante <= 999) {
-            numeroCuenta =
-            fecha.getFullYear().toString() +
-            "100" +
-            "0" +
-            countestudiante.toString();
-        }
-        if (countestudiante >= 999) {
-            numeroCuenta =
-            fecha.getFullYear().toString() + "100" + countestudiante.toString();
-        }
-        if (countestudiante === 0) {
-            numeroCuenta =
-            fecha.getFullYear().toString() + "100" + "0001";
-        }
-        
-        //creacion del estudiante
-        const newEstudiante = new estudiante({
-            numeroCuenta : numeroCuenta,
-            nombres : aspirantes.Nombre,
-            apellidos : aspirantes.Nombre.split(" ")[2] + " " + aspirantes.Nombre.split(" ")[3],
-            identidad : aspirantes.Identidad,
-            carrera : aspirantes.Carrera,
-            direccion : "sitio random de hondruas",
-            correoPersonal : aspirantes.CorreoPersonal,
-            centroRegional : aspirantes.Centro,
-            claveEstudiante : aspirantes.Identidad,
-        });
-
-        //guardado del estudiante en la base de datos
-        const savedEstudiante = await newEstudiante.save();
-        
-    } catch (error) {
-        console.log(error);
-
-    }
-};
-
-async function enviarCorreo(aspirante,info){
-    //funcion para elementos generico de envio de correo
-    try {
-        const mailOptions = {
-            from:       'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
-            to:         `${aspirante.correo}`,
-            subject:    info.asunto,
-            Text:       info.texto,
-            html:       info.html,
-        };
-        await mailer.sendMail(mailOptions);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-
-//configuracion de multer para subir archivos
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/");
@@ -140,11 +24,13 @@ const storage = multer.diskStorage({
 });
 
 
-//inicializacion de multer con la configuracion de arriba
 const upload = multer({ storage:storage });
 
-//exportacion de la funcion subir para ser usada en el archivo de rutas
 export const subir = upload.single("usrfile");
+
+
+
+/// SUBIR ARCHIVO
 
 export const subirArchivo = async (req,res) => {
     try {
@@ -158,12 +44,14 @@ export const subirArchivo = async (req,res) => {
         //let ultimoEstudiante = await estudiante.count()
         
         req.body.jsonArray = jsonArray;
-
+        const numeroRegistros = jsonArray.length;
+        let contador = 0;
 
     
 
         // foreach para ejecutar el enviar el correo a cada aspiraten
         forEach(jsonArray, async (aspirante) => {
+            contador++;
             const Identidad = aspirante["Identidad"];
             const notaPAA = aspirante["NotaPAA"];
             const tipoExamen = aspirante["TipoExamen"];
@@ -206,8 +94,7 @@ export const subirArchivo = async (req,res) => {
                             
                             <h2>Te esperamos en el centro regional ${aspiranteInfo.centro}</h2>
                             `
-                        }
-)
+                        })
                 };
                 if(notaPAA < notaMinCarrera){
                 //no aprovado
@@ -299,32 +186,102 @@ export const subirArchivo = async (req,res) => {
             
             
             
-            
-            const csvWriter = createObjectCsvWriter({
-                path: direccion,
-                header: [
-                    {id: 'nombre', title: 'Nombre'},
-                    {id: 'Identidad', title: 'Identidad'},
-                    {id: 'carrera', title: 'Carrera'},
-                    {id: 'correo', title: 'CorreoPersonal'},
-                    {id: 'centro', title: 'Centro'}
-                ]
-            });
+            const createCsvFile = () => {
+                return new Promise((resolve, reject) => {
+                    const csvWriter = createObjectCsvWriter({
+                        path: direccion,
+                        header: [
+                            {id: 'nombre', title: 'Nombre'},
+                            {id: 'Identidad', title: 'Identidad'},
+                            {id: 'carrera', title: 'Carrera'},
+                            {id: 'correo', title: 'CorreoPersonal'},
+                            {id: 'centro', title: 'Centro'}
+                        ]
+                    });
 
-            csvWriter.writeRecords(jsonArrayAprove)    
-                .then(() => {
-                    console.log('...Done');
-                }).catch((err) => {console.log(err)});
+                    csvWriter.writeRecords(jsonArrayAprove)
+                    .then(() =>{
+                        
+                            resolve();
+                        
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+
+                });
+            }
+            
+            await createCsvFile();
+
             
         });
-
-        return res.status(200).json({ Archivos: "Archivo subido",AspirantesCSV:"creado",Correos:"correos enviados a estudiantes" });
+        
+        if(contador === numeroRegistros){
+            return res.status(200).json({ Archivos: "Archivo subido",AspirantesCSV:"creado",Correos:"correos enviados a estudiantes", direccion  : direccion });
+        }
+        
     } catch (error) {
         return res.status(500).json({ message: error });
     }
     
 };
 
+
+
+async function infoAspirante(id){
+    try {
+        /*
+        Funcion para obtener los datos del aspirante
+        Id: la idea del aspirante
+        return: un json con los datos del aspirante
+        datos que contiene el json:
+            Nombre completo,
+            Identidad,
+            Carrera a la que pertenece, 
+            Dirección,
+            Correo personal,
+            Centro al que pertenece
+        */1
+        if(id === undefined){
+            return res.status(400).json({ message: "No se envio una identidad" });
+        }
+
+        //buscar al aspirante en la base de datos
+        const aspirantes = await aspirante.findOne({where: { identidad: id },});
+        //creacion del json
+        const jsonAspirante = {}
+        
+        //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
+        jsonAspirante["nombre"] = aspirantes.dataValues.nombres+" "+aspirantes.dataValues.apellidos;
+        jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
+        jsonAspirante["carrera"] = aspirantes.dataValues.carreraPrincipal;
+        jsonAspirante["direccion"] = "sitio random de hondruas";
+        jsonAspirante["correo"] = aspirantes.dataValues.correoPersonal;
+        jsonAspirante["centro"] = aspirantes.dataValues.centroRegional;
+
+        //retornar el json
+        return jsonAspirante;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+async function enviarCorreo(aspirante,info){
+    //funcion para elementos generico de envio de correo
+    try {
+        const mailOptions = {
+            from:       'Admisiones' + '<' + process.env.EMAIL_USER + "@gmail.com" +'>',
+            to:         `${aspirante.correo}`,
+            subject:    info.asunto,
+            Text:       info.texto,
+            html:       info.html,
+        };
+        await mailer.sendMail(mailOptions);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
 
@@ -350,16 +307,70 @@ export const creacionEstudiantes = async (req,res) => {
     }  
 };
 
-
-
-//inutil
-export const hash = async (req,res) => {
+async function addAprovado(aspirantes,countestudiante){
+    /*
+    funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
+    La mayor parte de la info se saca de la base de datos
+    */
+    console.log(aspirantes);
     try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash("perroloco2",salt);
-        return res.status(200).json({ hash: hash });
+        const fecha = new Date();
+        let numeroCuenta = "";
+        
+        //deliminacion para el numero de cuenta estructura <año><periodo de examen><#estudiante>
+        if (countestudiante <= 9) {
+                numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "000" +
+            countestudiante.toString();
+        }
+        if (countestudiante <= 99) {
+            numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "00" +
+            countestudiante.toString();
+        }
+        if (countestudiante >= 99 && countestudiante <= 999) {
+            numeroCuenta =
+            fecha.getFullYear().toString() +
+            "100" +
+            "0" +
+            countestudiante.toString();
+        }
+        if (countestudiante >= 999) {
+            numeroCuenta =
+            fecha.getFullYear().toString() + "100" + countestudiante.toString();
+        }
+        if (countestudiante === 0) {
+            numeroCuenta =
+            fecha.getFullYear().toString() + "100" + "0001";
+        }
+        
+        //creacion del estudiante
+        const newEstudiante = new estudiante({
+            numeroCuenta : numeroCuenta,
+            nombres : aspirantes.Nombre,
+            apellidos : aspirantes.Nombre.split(" ")[2] + " " + aspirantes.Nombre.split(" ")[3],
+            identidad : aspirantes.Identidad,
+            carrera : aspirantes.Carrera,
+            direccion : "sitio random de hondruas",
+            correoPersonal : aspirantes.CorreoPersonal,
+            centroRegional : aspirantes.Centro,
+            claveEstudiante : aspirantes.Identidad,
+        });
 
+        //guardado del estudiante en la base de datos
+        const savedEstudiante = await newEstudiante.save();
+        
     } catch (error) {
-        return res.status(500).json({ message: error });
+        console.log(error);
+
     }
+};
+
+export const enviarCSV = async (req,res) => {
+    const archivoPath = req.body.direccion;
+    res.sendFile(path.resolve(archivoPath));
 };
