@@ -65,3 +65,14 @@ estudiante.beforeCreate( async (estudiante, options) => {
         }
     }
 });
+
+estudiante.beforeUpdate( async (estudiante, options) => {
+    if(estudiante.claveEstudiante){
+        try {
+            const hashedPassword = await bcrypt.hash(estudiante.claveEstudiante, 10);
+            estudiante.claveEstudiante = hashedPassword;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+})

@@ -2,8 +2,7 @@ import { estudiante } from "../models/estudianteModel.js";
 import jwt from "jsonwebtoken";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { comparePassword } from "../helpers/comparePassword.js";
-import bcrypt from "bcrypt";
-
+import { enviarCorreo } from "../helpers/mailerManager.js";
 // correoPersonal , claveEstudiante
 
 export const loginEstudiante = async (req, res) => {
@@ -67,73 +66,66 @@ export const getEstudianteByCuenta = async (req, res) => {
   }
 };
 
-
 export const actualizarCarreraEstudiante = async (req, res) => {
-  try{
+  try {
     const { numeroCuenta, carrera } = req.body;
     await estudiante.update(
-      { carrera: carrera  , carreraSecundaria: null},
+      { carrera: carrera, carreraSecundaria: null },
       { where: { numeroCuenta: numeroCuenta } }
     );
     return res.status(200).json({ message: "Carrera actualizada con éxito" });
-
-  }catch(error){
+  } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
+//proceso para recuperar cotraseña
+//da click en recuperar contraseña->pone sus datos de numero de cuenta->se le envia un correo con la nueva contraseña
 
+export const passwordResetMail = async (req, res) => {
+  try {
+    const numCuenta = req.body.numeroCuenta;
+    const usuario = await estudiante.findOne({
+      where: { numeroCuenta: numCuenta },
+    });
 
-// export const recuperarClaveEstudiante = async (req, res) => {
-//   try {
-//     const { correoPersonal } = req.body;
-//     const estudianteEspecifico = await estudiante.findOne({
-//       where: { correoPersonal: correoPersonal },
-//     });
-//     if (!estudianteEspecifico) {
-//       return res.status(400).json({ message: "El estudiante no existe" });
-//     }
-//     return res.status(200).json(estudianteEspecifico);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ message: "Error en el servidor" });
-//   }
-// };
+    if (!usuario) {
+      return res.status(400).json({ message: "El estudiante no existe" });
+    }
+    console.log(usuario.dataValues);
 
-// export const cambiarClaveEstudiante = async (req, res) => {
-//     try {
-//         const { numeroCuenta } = req.body;
-//         const estudianteEspecifico = await estudiante.findOne({
-//             where: { numeroCuenta: numeroCuenta },
-//         });
-//         if (!estudianteEspecifico) {
-//             return res.status(400).json({ message: "El estudiante no existe" });
-//         }
-//         const claveNuevaEstudiante = 
-//         estudianteEspecifico.centroRegional.slice(-2) +
-//         estudianteEspecifico.nombres.slice(0, 1) +
-//         (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
-//         estudianteEspecifico.identidad.slice(-2);
+    let nuevaClave =
+      usuario.dataValues.centroRegional.slice(-2) +
+      usuario.dataValues.nombres.slice(0, 1) +
+      (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
+      usuario.dataValues.identidad.slice(-2);
 
-//         const salt = await bcrypt.genSalt(10);
-//         const hashedPassword = await bcrypt.hash(claveNuevaEstudiante, salt);
-//         await estudiante.update(
-//             { claveEstudiante: hashedPassword },
-//             { where: { numeroCuenta: numeroCuenta } }
-//         );
+    if (nuevaClave === usuario.dataValues.claveEstudiante) {
+      nuevaClave =
+        usuario.dataValues.nombres.slice(-2) +
+        usuario.dataValues.Nombre.slice(0, 1) +
+        (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
+        usuario.dataValues.identidad.slice(-2);
+    }
 
-//         // Enviar un correo con la nueva clave
+    await usuario.update({ claveEstudiante: nuevaClave });
 
-
-
-//         return res.status(200).json({ message: "Clave cambiada con éxito", claveNuevaEstudiante });
-        
-//     } catch (error) {
-
-//         console.log(error);
-        
-//     }
-// };
-
-
+    enviarCorreo({
+      from: "Sistema de registro UNAH",
+      correo: usuario.dataValues.correoPersonal,
+      asunto: "Recuperación de contraseña",
+      Text: "Recuperación de contraseña",
+      html: `
+      <h1>Recuperación de contraseña</h1>
+      <h2>Estimado ${usuario.dataValues.nombres} ${usuario.dataValues.apellidos}</h2>
+      <h3>Usted a solicitado un cambio de contraseña la sigueiente sera su nueva contraseña de ahora en adelante</h3>
+      <h3><strong>${nuevaClave}</strong></h3>
+      `,
+    });
+    return res.status(200).json({ message: "Correo enviado con éxito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
