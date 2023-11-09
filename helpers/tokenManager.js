@@ -27,8 +27,6 @@ export const generateRefreshJWT = (uid, res) => {
             sameSite: "none"
         })
         
-        
-        
     } catch (error) {
         console.log(error);
         

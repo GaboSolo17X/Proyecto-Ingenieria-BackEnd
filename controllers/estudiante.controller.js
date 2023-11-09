@@ -25,7 +25,7 @@ export const loginEstudiante = async (req, res) => {
 
     const { token, expiresIn } = generateJWT(estudianteLogin.numeroCuenta);
     generateRefreshJWT(estudianteLogin.numeroCuenta, res);
-
+    
     return res
       .status(200)
       .json({ message: "Login exitoso", token, expiresIn, estudianteLogin });
@@ -82,7 +82,6 @@ export const actualizarCarreraEstudiante = async (req, res) => {
 
 //proceso para recuperar cotraseña
 //da click en recuperar contraseña->pone sus datos de numero de cuenta->se le envia un correo con la nueva contraseña
-
 export const passwordResetMail = async (req, res) => {
   try {
     const numCuenta = req.body.numeroCuenta;
@@ -124,6 +123,25 @@ export const passwordResetMail = async (req, res) => {
       `,
     });
     return res.status(200).json({ message: "Correo enviado con éxito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+//obtener informacion del estudiante por medio del jwt
+export const getInfoByToken = async (req, res) => {
+  try {
+
+    //descoponemos el token 
+    const token = req.headers.authorization.split(" ")[1];
+
+    //sacamos el uid, iat, exp
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const estudianteInfo = await estudiante.findOne({
+      where: { numeroCuenta: decoded.uid },
+    }); 
+    return res.status(200).json(estudianteInfo);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error en el servidor" });
