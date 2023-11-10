@@ -46,6 +46,7 @@ export const subirArchivo = async (req, res) => {
       const tipo = tipoExamen === undefined && notaExamen === undefined;
 
       const aspiranteInfo = await infoAspirante(Identidad);
+      console.log(tipoExamen,notaExamen)
       let notaMinCarrera = await carrera.findOne({
         where: { nombreCarrera: aspiranteInfo.carrera },
       });
@@ -53,6 +54,7 @@ export const subirArchivo = async (req, res) => {
       let notaMinExamenCarrera = await carrera.findOne({
         where: { nombreCarrera: aspiranteInfo.carrera },
       });
+      console.log(notaMinCarrera,notaMinCarrera)
       notaMinExamenCarrera = notaMinExamenCarrera.dataValues.notaMinEx;
 
       if (aspiranteInfo === undefined) {
@@ -168,7 +170,8 @@ export const subirArchivo = async (req, res) => {
           const csvWriter = createObjectCsvWriter({
             path: direccion,
             header: [
-              { id: "nombre", title: "Nombre" },
+              { id: "nombre", title: "Nombres" },
+              { id: "apellido", title: "Apellidos"},
               { id: "Identidad", title: "Identidad" },
               { id: "carrera", title: "Carrera" },
               { id: "carreraSecundaria", title: "CarreraSecundaria" },
@@ -227,8 +230,8 @@ async function infoAspirante(id) {
     const jsonAspirante = {};
 
     //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
-    jsonAspirante["nombre"] =
-      aspirantes.dataValues.nombres + " " + aspirantes.dataValues.apellidos;
+    jsonAspirante["nombre"] =aspirantes.dataValues.nombres;
+    jsonAspirante["apellido"]=aspirantes.dataValues.apellidos;
     jsonAspirante["Identidad"] = aspirantes.dataValues.identidad;
     jsonAspirante["carrera"] = aspirantes.dataValues.carreraPrincipal;
     jsonAspirante["carreraSecundaria"] = aspirantes.dataValues.carreraSecundaria;
@@ -286,6 +289,8 @@ async function addAprovado(aspirantes, countestudiante) {
     funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
     La mayor parte de la info se saca de la base de datos
     */
+
+    
   try {
     const fecha = new Date();
     let claveEstudiante = "";
@@ -325,7 +330,7 @@ async function addAprovado(aspirantes, countestudiante) {
     //cu,curl,vs
     claveEstudiante =
       aspirantes.Centro.slice(-2) +
-      aspirantes.Nombre.slice(0, 1) +
+      aspirantes.Nombres.slice(0, 1) +
       (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
       aspirantes.Identidad.slice(-2);
 
@@ -341,9 +346,8 @@ async function addAprovado(aspirantes, countestudiante) {
 
     const newEstudiante = new estudiante({
       numeroCuenta: numeroCuenta,
-      nombres: aspirantes.Nombre,
-      apellidos:
-        aspirantes.Nombre.split(" ")[2] + " " + aspirantes.Nombre.split(" ")[3],
+      nombres: aspirantes.Nombres,
+      apellidos:aspirantes.Apellidos,
       identidad: aspirantes.Identidad,
       carrera: carreraPrincipal,
       direccion: "sitio random de hondruas",
@@ -361,7 +365,7 @@ async function addAprovado(aspirantes, countestudiante) {
       subject: "Creacion de usuario",
       Text: "Felicidades, Se ha Creado tu cuenta de estudiante",
       html: `
-            <h1>Felicidades ${aspirantes.Nombre}, se ha creado tu usuario</h1>
+            <h1>Felicidades ${aspirantes.Nombres} ${aspirantes.Apellidos}, se ha creado tu usuario</h1>
             <h2> Esperamos que te encuentres muy bien nos alegra informarte que tu usuario ha sido creado en la universidad</h2>    
             <h2>Numero de cuenta: ${numeroCuenta}</h2>
             <h2>Clave de estudiante: ${claveEstudiante}</h2>
