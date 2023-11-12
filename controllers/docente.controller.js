@@ -67,7 +67,7 @@ export const registerDocente = async (req, res) => {
         //el numero de empleado se crea con el patron 0201000001, 0201000002, 0201000003 
         let numeroEmpleadoDocente = ("000000" + (await docente.count()+1).toString()).slice(-6);
         numeroEmpleadoDocente = `0201${numeroEmpleadoDocente}`;
-
+        console.log(numeroEmpleadoDocente)
         if (docente.findOne({where: {numeroEmpleadoDocente}})) {
             numeroEmpleadoDocente++
         }
