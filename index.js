@@ -15,16 +15,18 @@ import jefeDepartamentoRouter from "./routes/jefeDepartamento.route.js";
 import carrerasRouter from "./routes/carreras.route.js";
 import tokenRouter from "./routes/token.route.js";
 import aspiranteRouter from "./routes/aspirante.route.js";
-import { asignatura } from "./models/asignaturaModel.js";
-import { seccion } from "./models/seccionModel.js";
-import { matricula } from "./models/matriculaModel.js";
-import { listaEspera } from "./models/listaEsperaModel.js";
-import { edificio } from "./models/edificioModel.js";
-import { aula } from "./models/aulaModel.js";
-import { historial } from "./models/historialModel.js";
-import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
-import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
-import { solicitud } from "./models/solicitudesModel.js";
+import matriculaRouter from "./routes/matriculas.route.js";
+import seccionRouter from "./routes/seccion.router.js";
+// import { asignatura } from "./models/asignaturaModel.js";
+// import { seccion } from "./models/seccionModel.js";
+// import { matricula } from "./models/matriculaModel.js";
+// import { listaEspera } from "./models/listaEsperaModel.js";
+// import { edificio } from "./models/edificioModel.js";
+// import { aula } from "./models/aulaModel.js";
+// import { historial } from "./models/historialModel.js";
+// import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
+// import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
+// import { solicitud } from "./models/solicitudesModel.js";
 
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
 const app = express();
@@ -63,6 +65,8 @@ app.use("/administrador", administradorRouter);
 app.use("/jefeDepartamento", jefeDepartamentoRouter);
 app.use("/carreras", carrerasRouter);
 app.use("/token", tokenRouter);
+app.use("/matricula", matriculaRouter);
+app.use("/seccion", seccionRouter)
 
 // Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
