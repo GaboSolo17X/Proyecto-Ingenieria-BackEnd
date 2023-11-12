@@ -9,10 +9,10 @@ import {
     getNotasPeriodo,
     guardarEvaluacion,
     contUpload,
-    solicitudCambioCarrera,
-    solicitudCambioCentro,
-    cancelacionClases,
-    uploadPdf
+    solicitudCambioCarrera, contCambioCarrera,
+    solicitudCambioCentro,contCambioCentro,
+    solicitudCancelacionClases,uploadPdf,
+    solicitudReposicion, contReposicion
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -24,9 +24,9 @@ router.post("/actualizarCarrera",actualizarCarreraEstudiante);
 router.post("/recuperacionClave",passwordResetMail);
 router.get("/getInfoByToken",getInfoByToken);
 router.get("/getNotas",getNotasPeriodo);
-router.post("/evalucionDocente",contUpload.array('formulario'),guardarEvaluacion);
-router.post("/solicitudCambioCarrera",solicitudCambioCarrera);
-router.post("/solicitudCambioCentro",solicitudCambioCentro);
-router.post("/cancelacionExcepcional",uploadPdf,cancelacionClases);
-
+router.post("/evalucionDocente",contUpload.array(),guardarEvaluacion);
+router.post("/solicitudCambioCarrera",contCambioCarrera.array(),solicitudCambioCarrera);
+router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCentro);
+router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
+router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
 export default router;

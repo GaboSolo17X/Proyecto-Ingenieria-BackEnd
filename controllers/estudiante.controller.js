@@ -1,23 +1,18 @@
 import { estudiante } from "../models/estudianteModel.js";
 import { matricula } from "../models/matriculaModel.js";
+import { seccion } from "../models/seccionModel.js";
+import { docente } from "../models/docenteModel.js";
 import { solicitud } from "../models/solicitudesModel.js";
+import { evaluacion } from "../models/evaluacionModel.js";
 import jwt from "jsonwebtoken";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
 import multer from "multer";
+import { forEach } from "underscore";
 // correoPersonal , claveEstudiante
 
-const cancelacionPdf = multer.diskStorage({
-  destination: function (req, file, cb) {
-      cb(null, './public/solicitudes')
-  },
-  filename: function (req, file, cb) {
-      cb(null, `${Date.now()}-cancelacion-${file.originalname}`)
-  }
-})
 
-export const uploadPdf = multer({ storage: cancelacionPdf }).single('cancelacionPdf')
 
 const storage = multer.memoryStorage(); // Puedes cambiar esto según tus necesidades
 export const  contUpload = multer({ storage: storage });
@@ -208,21 +203,41 @@ export const getNotasPeriodo = async (req, res) => {
   }
 };
 
-
-//Guardar las evaluaciones de los docentes
+//guardarEvaluacion sin token
 export const guardarEvaluacion = async (req, res) => {
   try {
-    const conetnido = req.body
+    const respuestasForm = []
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido)
+    });
 
-    
-    const info = await InfoByToken(req,res);
-    info === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
-    if(conetnido == {}){
+    console.log(respuestasForm[0,4]);
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:req.body.cuenta}});
+    const matriculaid = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
+    const infoSeccion = await seccion.findOne({where:{idSeccion:matriculaid.dataValues.idSeccion}});
+    const infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:infoSeccion.dataValues.numeroEmpleadoDocente}});
+
+    //console.log(infoEstudiante.dataValues,matriculaid.dataValues,infoSeccion.dataValues,infoDocente.dataValues);
+
+
+    infoEstudiante === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
+
+
+    if(req.body == {}){
       return res.status(400).json({ message: "No se recibio nada" });
     }
-    
+    const evaluacionInput = new evaluacion({
+      idMatricula: matriculaid.dataValues.idMatricula,
+      idEstudiante: infoEstudiante.dataValues.numeroCuenta,
+      idDocente: infoSeccion.dataValues.numeroEmpleadoDocente,
+      respuestas: `${respuestasForm[0]},${respuestasForm[1]},${respuestasForm[2]},${respuestasForm[3]},${respuestasForm[4]}`,
+      respuestaTexto1: respuestasForm[5],
+      respuestaTexto2: respuestasForm[6],
+      estado: true,
+    });
 
-    //To Do añadirlo a la base de datos
+    //posible modificacion por creacion de evaluaciones con la entrega de notas
+    await evaluacionInput.save();
 
     return res.status(200).json({ message: "Evaluacion guardada con exito" });
   } catch (error) {
@@ -231,28 +246,35 @@ export const guardarEvaluacion = async (req, res) => {
   }
 };
 
+
+//multer para recibir formulario de cambio de carrera
+export const contCambioCarrera = multer({ storage: storage });
+//solicitudCambioCarrera sin token usar numero de cuenta
 export const solicitudCambioCarrera = async (req, res) => {
   try {
-    const { carreraCambio, justificacion } = req.body;
-    const info = await InfoByToken(req,res);
-    const solicitudID = await solicitud.count() + 1;
-    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:info.numeroCuenta}});
+
+    //0.cuenta 1.carreraCambio 2.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
 
 
-    info === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
+    infoEstudiante === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
 
     const nuevaSolicitud = await solicitud.create({
-      idSolicitud: solicitudID+"",
       tipoSolicitud: "Cambio de Carrera",
-      recurso: "carreraCambio",
-      diccionario : "nose",
-      justificacion: justificacion,
+      recurso: null,
+      diccionario : respuestasForm[1],
+      justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
-      numeroCuenta: info.numeroCuenta,
+      numeroCuenta: respuestasForm[0],
     });
     nuevaSolicitud.save();
 
-    console.log(nuevaSolicitud.dataValues);
     return res.status(200).json({ message: "Solicitud enviada con exito" });
   } catch (error) {
     console.log(error);
@@ -262,28 +284,33 @@ export const solicitudCambioCarrera = async (req, res) => {
 };
 
 
+//multer para recibir formulario de cambio de carrera
+export const contCambioCentro = multer({ storage: storage });
+//solicitudCambioCentro sin token usar numero de cuenta
 export const solicitudCambioCentro = async (req, res) => {
   try {
-    const { centroCambio, justificacion } = req.body;
-    const info = await InfoByToken(req,res);
-    const solicitudID = await solicitud.count() + 1;
-    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:info.numeroCuenta}});
+
+    //0.cuenta 1.carreraCambio 2.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
 
 
-    info === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
+    infoEstudiante.dataValues === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
 
     const nuevaSolicitud = await solicitud.create({
-      idSolicitud: solicitudID+"",
       tipoSolicitud: "Cambio de Centro",
-      recurso: centroCambio,
-      diccionario : "nose",
-      justificacion: justificacion,
+      recurso: null,
+      diccionario : respuestasForm[1],
+      justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
-      numeroCuenta: info.numeroCuenta,
+      numeroCuenta: infoEstudiante.dataValues.numeroCuenta,
     });
     nuevaSolicitud.save();
 
-    console.log(nuevaSolicitud.dataValues);
     return res.status(200).json({ message: "Solicitud enviada con exito" });
   } catch (error) {
     console.log(error);
@@ -292,31 +319,52 @@ export const solicitudCambioCentro = async (req, res) => {
 };
 
 
-export const cancelacionClases = async (req, res) => {
-  try {
-    const contenido = req.body;
-    const archivo = req.file.filename;
+//multer para recibir formulario de Cancelacion Excepcional
+const cancelacionPdf = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, './public/solicitudes')
+  },
+  filename: function (req, file, cb) {
+      cb(null, `${Date.now()}-cancelacion-${file.originalname}`)
+  }
+})
 
-    //info del estudiante con el token
-    const info = await InfoByToken(req,res);
-    const solicitudID = await solicitud.count() + 1;
-    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:info.numeroCuenta}});
+export const uploadPdf = multer({ storage: cancelacionPdf }).single('cancelacionPdf')
+
+//solicitud de cancelacion de clases sin token usar numero de cuenta
+export const solicitudCancelacionClases = async (req, res) => {
+  try {
+    //primer elemento:cuenta
+    //elementos enmedio: clases
+    //ultimo elemento: justificacion
+    const respuestasForm = [];
+    let clases = "";
+    const archivo = req.file.path;
+    //paso el conetnido del formulario a un array
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    }); 
+
+    //saco las clases del array y las paso al array clases
+    for (let index = 1; index < respuestasForm.length-1; index++) {
+      clases = clases + respuestasForm[index] + ",";
+    }
+
+    //info del estudiante y matricula
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
 
     //creacion de la solicitud 
 
     const nuevaSolicitud = await solicitud.create({
-      idSolicitud: solicitudID+"",
       tipoSolicitud: "Cancelacion Excepcional",
       recurso: archivo,
-      diccionario : contenido.clases,
-      justificacion: contenido.justificacion,
+      diccionario : clases,
+      justificacion: respuestasForm[respuestasForm.length-1],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
-      numeroCuenta: info.numeroCuenta,
+      numeroCuenta: respuestasForm[0],
     });
 
     nuevaSolicitud.save();
-
-    console.log(nuevaSolicitud.dataValues);
 
     return res.status(200).json({ message: "Solicitud enviada con exito" });
   } catch (error) {
@@ -324,3 +372,46 @@ export const cancelacionClases = async (req, res) => {
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
+//multer para recibir formulario de reposicion
+export const contReposicion = multer({ storage: storage });
+
+//solicitud de reposicion de clases sin token usar numero de cuenta
+export const solicitudReposicion = async (req, res) => {
+  try {
+    //0.cuenta ,1.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
+
+    const nuevaSolicitud = await solicitud.create({
+      tipoSolicitud: "Pago Reposicion",
+      recurso: null,
+      diccionario : null,
+      justificacion: respuestasForm[1],
+      idMatricula: estudianteMatricula.dataValues.idMatricula,
+      numeroCuenta: respuestasForm[0],
+    });
+
+    nuevaSolicitud.save();
+
+    return res.status(200).json({ message: "Solicitud enviada con exito" });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+    
+  }
+};
+
+
+
+/*
+
+metodo general para obtener info con token
+usar la funcion infoByToken para obtener la info del estudiante que se encuentra logeado que retorna un objeto con la info del estudiante
+
+*/
