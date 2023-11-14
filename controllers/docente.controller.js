@@ -4,7 +4,11 @@ import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { comparePassword } from "../helpers/comparePassword.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-
+import { seccion } from "../models/seccionModel.js";
+import { matricula } from "../models/matriculaModel.js";
+import { estudiante } from "../models/estudianteModel.js";
+import exceljs from "exceljs";
+import path from "path";
 
 const storageFotoCertificado = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -34,7 +38,7 @@ export const loginDocente = async (req, res) => {
         const { token, expiresIn } = generateJWT(docenteLogin.numeroEmpleadoDocente);
         generateRefreshJWT(docenteLogin.numeroEmpleadoDocente, res);
 
-        return res.status(200).json({ message: "Login exitoso", token, expiresIn });
+        return res.status(200).json({ message: "Login exitoso", token, expiresIn , docente: docenteLogin});
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error en el servidor" });
@@ -118,4 +122,51 @@ export const getDocenteByNumeroEmpleado = async (req, res) => {
         return res.status(500).json({ message: "Error en el servidor" });
     }
 
+};
+
+export const getSeccionesDocente = async (req, res) => {
+    const { numeroEmpleadoDocente } = req.body;
+    const secciones = await seccion.findAll({ where: { numeroEmpleadoDocente } });
+    if (secciones.length === 0) {
+        return res.status(400).json({ message: "El docente no tiene secciones asignadas" });
+    }
+    return res.status(200).json({ message: "Secciones encontradas", secciones });
+
+};
+
+export const descargarListadoEstudiantes = async (req, res) => {
+
+    let {idSeccion} = req.body;
+    idSeccion = parseInt(idSeccion);
+    const direccion = `util/listadoEstudiantes${idSeccion}.xlsx`;
+    const datos = [];
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet("Listado de estudiantes");
+    const seccionFound = await matricula.findAll({include: seccion, where: {idSeccion}, attributes: ["numeroCuenta"]});
+    for (const seccion of seccionFound) {
+        let estudianteFound = await estudiante.findOne({where: {numeroCuenta: seccion.dataValues.numeroCuenta}, attributes: ["nombres", "apellidos", 'identidad', 'correoPersonal'] });
+        datos.push(estudianteFound.dataValues);
+    }
+    worksheet.columns = [
+        { header: "Nombres", key: "nombres", width: 30 },
+        { header: "Apellidos", key: "apellidos", width: 30 },
+        { header: "Identidad", key: "identidad", width: 30 },
+        { header: "Correo", key: "correoPersonal", width: 30 },
+    ];
+    worksheet.addRows(datos);
+    workbook.xlsx.writeFile(direccion).then(() => {
+        enviarListadoEstudiantes(direccion, req, res);
+    }).catch((error) => {
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
+    });
+
+};
+
+export const enviarListadoEstudiantes = async (direccion, req, res) => {
+    try {
+        res.status(200).sendFile(path.resolve(direccion));
+    } catch (error) {
+        console.log(error);
+    }
 };
