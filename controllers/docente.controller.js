@@ -21,6 +21,22 @@ const storageFotoCertificado = multer.diskStorage({
 
 export const upload = multer({ storage: storageFotoCertificado }).single('fotoDocente')
 
+const InfoByToken = async (req, res) => {
+    try {
+  
+      //descoponemos el token 
+      const token = req.body.token.split(" ")[1];
+  
+      //sacamos el uid, iat, exp
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const docenteInfo = await docente.findOne({
+        where: { numeroEmpleadoDocente: decoded.uid },
+      }); 
+      return docenteInfo.dataValues;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
 export const loginDocente = async (req, res) => {
     try {

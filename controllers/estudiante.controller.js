@@ -10,6 +10,7 @@ import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
 import multer from "multer";
 import { forEach } from "underscore";
+import fs from "fs"
 // correoPersonal , claveEstudiante
 
 
@@ -21,6 +22,7 @@ export const  contUpload = multer({ storage: storage });
 
 export const loginEstudiante = async (req, res) => {
   try {
+    
     const { numeroCuenta, claveEstudiante } = req.body;
     let estudianteLogin = await estudiante.findOne({
       where: { numeroCuenta: numeroCuenta },
