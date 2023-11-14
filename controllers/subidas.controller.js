@@ -1,14 +1,11 @@
 import multer from "multer";
 import csv from "csvtojson";
 import mailer from "../config/confMailer.js";
-import fs from "fs";
-import { json2csv } from "json-2-csv";
 import { forEach, where } from "underscore";
 import { aspirante } from "../models/aspiranteModel.js";
 import { estudiante } from "../models/estudianteModel.js";
 import { createObjectCsvWriter } from "csv-writer";
 import { carrera } from "../models/carreraModel.js";
-import bcrypt from "bcryptjs";
 import path from "path";
 
 /// SUBIR CSV

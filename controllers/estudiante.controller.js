@@ -1,10 +1,23 @@
 import { estudiante } from "../models/estudianteModel.js";
+import { matricula } from "../models/matriculaModel.js";
+import { seccion } from "../models/seccionModel.js";
+import { docente } from "../models/docenteModel.js";
+import { solicitud } from "../models/solicitudesModel.js";
+import { evaluacion } from "../models/evaluacionModel.js";
 import jwt from "jsonwebtoken";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { comparePassword } from "../helpers/comparePassword.js";
-import bcrypt from "bcrypt";
-
+import { enviarCorreo } from "../helpers/mailerManager.js";
+import multer from "multer";
+import { forEach } from "underscore";
 // correoPersonal , claveEstudiante
+
+
+
+const storage = multer.memoryStorage(); // Puedes cambiar esto según tus necesidades
+export const  contUpload = multer({ storage: storage });
+
+
 
 export const loginEstudiante = async (req, res) => {
   try {
@@ -26,7 +39,7 @@ export const loginEstudiante = async (req, res) => {
 
     const { token, expiresIn } = generateJWT(estudianteLogin.numeroCuenta);
     generateRefreshJWT(estudianteLogin.numeroCuenta, res);
-
+    
     return res
       .status(200)
       .json({ message: "Login exitoso", token, expiresIn, estudianteLogin });
@@ -67,73 +80,337 @@ export const getEstudianteByCuenta = async (req, res) => {
   }
 };
 
-
 export const actualizarCarreraEstudiante = async (req, res) => {
-  try{
+  try {
     const { numeroCuenta, carrera } = req.body;
     await estudiante.update(
-      { carrera: carrera  , carreraSecundaria: null},
+      { carrera: carrera, carreraSecundaria: null },
       { where: { numeroCuenta: numeroCuenta } }
     );
     return res.status(200).json({ message: "Carrera actualizada con éxito" });
-
-  }catch(error){
+  } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
+//proceso para recuperar cotraseña
+//da click en recuperar contraseña->pone sus datos de numero de cuenta->se le envia un correo con la nueva contraseña
+export const passwordResetMail = async (req, res) => {
+  try {
+    const numCuenta = req.body.numeroCuenta;
+    const usuario = await estudiante.findOne({
+      where: { numeroCuenta: numCuenta },
+    });
+
+    if (!usuario) {
+      return res.status(400).json({ message: "El estudiante no existe" });
+    }
+    console.log(usuario.dataValues);
+
+    let nuevaClave =
+      usuario.dataValues.centroRegional.slice(-2) +
+      usuario.dataValues.nombres.slice(0, 1) +
+      (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
+      usuario.dataValues.identidad.slice(-2);
+
+    if (nuevaClave === usuario.dataValues.claveEstudiante) {
+      nuevaClave =
+        usuario.dataValues.nombres.slice(-2) +
+        usuario.dataValues.Nombre.slice(0, 1) +
+        (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
+        usuario.dataValues.identidad.slice(-2);
+    }
+
+    await usuario.update({ claveEstudiante: nuevaClave });
+
+    enviarCorreo({
+      from: "Sistema de registro UNAH",
+      correo: usuario.dataValues.correoPersonal,
+      asunto: "Recuperación de contraseña",
+      Text: "Recuperación de contraseña",
+      html: `
+      <h1>Recuperación de contraseña</h1>
+      <h2>Estimado ${usuario.dataValues.nombres} ${usuario.dataValues.apellidos}</h2>
+      <h3>Usted a solicitado un cambio de contraseña la sigueiente sera su nueva contraseña de ahora en adelante</h3>
+      <h3><strong>${nuevaClave}</strong></h3>
+      `,
+    });
+    return res.status(200).json({ message: "Correo enviado con éxito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+//obtener informacion del estudiante por medio del jwt
+export const getInfoByToken = async (req, res) => {
+  try {
+
+    //descoponemos el token 
+    const token = req.headers.authorization.split(" ")[1];
+
+    //sacamos el uid, iat, exp
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const estudianteInfo = await estudiante.findOne({
+      where: { numeroCuenta: decoded.uid },
+    }); 
+    return res.status(200).json(estudianteInfo);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+const InfoByToken = async (req, res) => {
+  try {
+
+    //descoponemos el token 
+    const token = req.headers.authorization.split(" ")[1];
+
+    //sacamos el uid, iat, exp
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const estudianteInfo = await estudiante.findOne({
+      where: { numeroCuenta: decoded.uid },
+    }); 
+    return estudianteInfo.dataValues;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 
-// export const recuperarClaveEstudiante = async (req, res) => {
-//   try {
-//     const { correoPersonal } = req.body;
-//     const estudianteEspecifico = await estudiante.findOne({
-//       where: { correoPersonal: correoPersonal },
-//     });
-//     if (!estudianteEspecifico) {
-//       return res.status(400).json({ message: "El estudiante no existe" });
-//     }
-//     return res.status(200).json(estudianteEspecifico);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ message: "Error en el servidor" });
-//   }
-// };
+//obtener las notas obtenidas en las clase que matriculo durante el periodo.
+export const getNotasPeriodo = async (req, res) => {
+  try {
+    const {numeroCuenta,periodo} = req.body;
+    if( await estudiante.findOne({where:{numeroCuenta:numeroCuenta}}) === null){
+      return res.status(400).json({ message: "El estudiante no existe" });
+    }
+    const notas = await matricula.findAll({
+      where: { periodo: periodo },
+      where: { numeroCuenta: numeroCuenta }
+    });
+    if(notas.length === 0){
+      return res.status(400).json({ message: "El estudiante no tiene notas" });
+    }
 
-// export const cambiarClaveEstudiante = async (req, res) => {
-//     try {
-//         const { numeroCuenta } = req.body;
-//         const estudianteEspecifico = await estudiante.findOne({
-//             where: { numeroCuenta: numeroCuenta },
-//         });
-//         if (!estudianteEspecifico) {
-//             return res.status(400).json({ message: "El estudiante no existe" });
-//         }
-//         const claveNuevaEstudiante = 
-//         estudianteEspecifico.centroRegional.slice(-2) +
-//         estudianteEspecifico.nombres.slice(0, 1) +
-//         (Math.floor(Math.random() * 99) + 1).toString().padStart(2, "0") +
-//         estudianteEspecifico.identidad.slice(-2);
+    return res.status(200).json(notas);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+    
+  }
+};
 
-//         const salt = await bcrypt.genSalt(10);
-//         const hashedPassword = await bcrypt.hash(claveNuevaEstudiante, salt);
-//         await estudiante.update(
-//             { claveEstudiante: hashedPassword },
-//             { where: { numeroCuenta: numeroCuenta } }
-//         );
+//guardarEvaluacion sin token
+export const guardarEvaluacion = async (req, res) => {
+  try {
+    const respuestasForm = []
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido)
+    });
 
-//         // Enviar un correo con la nueva clave
+    console.log(respuestasForm[0,4]);
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:req.body.cuenta}});
+    const matriculaid = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
+    const infoSeccion = await seccion.findOne({where:{idSeccion:matriculaid.dataValues.idSeccion}});
+    const infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:infoSeccion.dataValues.numeroEmpleadoDocente}});
 
+    //console.log(infoEstudiante.dataValues,matriculaid.dataValues,infoSeccion.dataValues,infoDocente.dataValues);
 
 
-//         return res.status(200).json({ message: "Clave cambiada con éxito", claveNuevaEstudiante });
-        
-//     } catch (error) {
-
-//         console.log(error);
-        
-//     }
-// };
+    infoEstudiante === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
 
 
+    if(req.body == {}){
+      return res.status(400).json({ message: "No se recibio nada" });
+    }
+    const evaluacionInput = new evaluacion({
+      idMatricula: matriculaid.dataValues.idMatricula,
+      idEstudiante: infoEstudiante.dataValues.numeroCuenta,
+      idDocente: infoSeccion.dataValues.numeroEmpleadoDocente,
+      respuestas: `${respuestasForm[0]},${respuestasForm[1]},${respuestasForm[2]},${respuestasForm[3]},${respuestasForm[4]}`,
+      respuestaTexto1: respuestasForm[5],
+      respuestaTexto2: respuestasForm[6],
+      estado: true,
+    });
+
+    //posible modificacion por creacion de evaluaciones con la entrega de notas
+    await evaluacionInput.save();
+
+    return res.status(200).json({ message: "Evaluacion guardada con exito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" },error);
+  }
+};
+
+//multer para recibir formulario de cambio de carrera
+export const contCambioCarrera = multer({ storage: storage });
+//solicitudCambioCarrera sin token usar numero de cuenta
+export const solicitudCambioCarrera = async (req, res) => {
+  try {
+
+    //0.cuenta 1.carreraCambio 2.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
+
+
+    infoEstudiante === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
+
+    const nuevaSolicitud = await solicitud.create({
+      tipoSolicitud: "Cambio de Carrera",
+      recurso: null,
+      diccionario : respuestasForm[1],
+      justificacion: respuestasForm[2],
+      idMatricula: estudianteMatricula.dataValues.idMatricula,
+      numeroCuenta: respuestasForm[0],
+    });
+    nuevaSolicitud.save();
+
+    return res.status(200).json({ message: "Solicitud enviada con exito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+
+};
+
+
+//multer para recibir formulario de cambio de carrera
+export const contCambioCentro = multer({ storage: storage });
+//solicitudCambioCentro sin token usar numero de cuenta
+export const solicitudCambioCentro = async (req, res) => {
+  try {
+
+    //0.cuenta 1.carreraCambio 2.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
+
+
+    infoEstudiante.dataValues === "undefine" ? res.status(400).json({ message: "No se recibio nada" }) : null;
+
+    const nuevaSolicitud = await solicitud.create({
+      tipoSolicitud: "Cambio de Centro",
+      recurso: null,
+      diccionario : respuestasForm[1],
+      justificacion: respuestasForm[2],
+      idMatricula: estudianteMatricula.dataValues.idMatricula,
+      numeroCuenta: infoEstudiante.dataValues.numeroCuenta,
+    });
+    nuevaSolicitud.save();
+
+    return res.status(200).json({ message: "Solicitud enviada con exito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+
+//multer para recibir formulario de Cancelacion Excepcional
+const cancelacionPdf = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, './public/solicitudes')
+  },
+  filename: function (req, file, cb) {
+      cb(null, `${Date.now()}-cancelacion-${file.originalname}`)
+  }
+})
+
+export const uploadPdf = multer({ storage: cancelacionPdf }).single('cancelacionPdf')
+
+//solicitud de cancelacion de clases sin token usar numero de cuenta
+export const solicitudCancelacionClases = async (req, res) => {
+  try {
+    //primer elemento:cuenta
+    //elementos enmedio: clases
+    //ultimo elemento: justificacion
+    const respuestasForm = [];
+    let clases = "";
+    const archivo = req.file.path;
+    //paso el conetnido del formulario a un array
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    }); 
+
+    //saco las clases del array y las paso al array clases
+    for (let index = 1; index < respuestasForm.length-1; index++) {
+      clases = clases + respuestasForm[index] + ",";
+    }
+
+    //info del estudiante y matricula
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
+
+    //creacion de la solicitud 
+
+    const nuevaSolicitud = await solicitud.create({
+      tipoSolicitud: "Cancelacion Excepcional",
+      recurso: archivo,
+      diccionario : clases,
+      justificacion: respuestasForm[respuestasForm.length-1],
+      idMatricula: estudianteMatricula.dataValues.idMatricula,
+      numeroCuenta: respuestasForm[0],
+    });
+
+    nuevaSolicitud.save();
+
+    return res.status(200).json({ message: "Solicitud enviada con exito" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+//multer para recibir formulario de reposicion
+export const contReposicion = multer({ storage: storage });
+
+//solicitud de reposicion de clases sin token usar numero de cuenta
+export const solicitudReposicion = async (req, res) => {
+  try {
+    //0.cuenta ,1.justificacion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
+    const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
+
+    const nuevaSolicitud = await solicitud.create({
+      tipoSolicitud: "Pago Reposicion",
+      recurso: null,
+      diccionario : null,
+      justificacion: respuestasForm[1],
+      idMatricula: estudianteMatricula.dataValues.idMatricula,
+      numeroCuenta: respuestasForm[0],
+    });
+
+    nuevaSolicitud.save();
+
+    return res.status(200).json({ message: "Solicitud enviada con exito" });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+    
+  }
+};
+
+
+
+/*
+
+metodo general para obtener info con token
+usar la funcion infoByToken para obtener la info del estudiante que se encuentra logeado que retorna un objeto con la info del estudiante
+
+*/

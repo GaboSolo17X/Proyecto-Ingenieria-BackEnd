@@ -22,11 +22,11 @@ export const solicitud = sequelize.define(
         },
         recurso:{
             type: DataTypes.STRING(200),
-            allowNull: false
+            allowNull: true
         },
         diccionario: {
             type: DataTypes.STRING(300),
-            allowNull: false
+            allowNull: true
         },
         justificacion: {
             type: DataTypes.STRING(700),
