@@ -246,7 +246,6 @@ export const guardarEvaluacion = async (req, res) => {
   }
 };
 
-
 //multer para recibir formulario de cambio de carrera
 export const contCambioCarrera = multer({ storage: storage });
 //solicitudCambioCarrera sin token usar numero de cuenta
