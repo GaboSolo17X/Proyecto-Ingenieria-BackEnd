@@ -7,6 +7,7 @@ import { comparePassword } from "../helpers/comparePassword.js";
 
 export const loginCoordinador = async (req, res) => {
     
+    
     try {
         const { id, clave } = req.body;
         let coordinadorLogin = await cordinadorDocente.findOne({where: {numeroEmpleadoDocente: id}})
@@ -22,7 +23,7 @@ export const loginCoordinador = async (req, res) => {
         const { token, expiresIn } = generateJWT(coordinadorLogin.numeroEmpleadoDocente);
         generateRefreshJWT(coordinadorLogin.numeroEmpleadoDocente, res);
 
-        return res.status(200).json({ message: "Login exitoso", token, expiresIn });
+        return res.status(200).json({ message: "Login exitoso", token, expiresIn, coordinador: coordinadorLogin });
         
         
     } catch (error) {

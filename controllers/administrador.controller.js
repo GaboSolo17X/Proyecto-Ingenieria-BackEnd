@@ -21,7 +21,7 @@ export const loginAdministrador = async (req, res) => {
         const { token, expiresIn } = generateJWT(administradorLogin.numeroEmpleadoAdministrador);
         generateRefreshJWT(administradorLogin.numeroEmpleadoAdministrador, res);
 
-        return res.status(200).json({ message: "Login exitoso", token, expiresIn });
+        return res.status(200).json({ message: "Login exitoso", token, expiresIn, administrador: administradorLogin });
         
     } catch (error) {
         
