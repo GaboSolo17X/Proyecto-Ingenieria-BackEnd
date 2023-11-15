@@ -5,11 +5,11 @@ import { docente } from "../models/docenteModel.js";
 import { solicitud } from "../models/solicitudesModel.js";
 import { evaluacion } from "../models/evaluacionModel.js";
 import { historial } from "../models/historialModel.js";
-import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
-import { forEach } from "underscore";
 import { asignatura } from "../models/asignaturaModel.js";
+import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
+import { forEach } from "underscore";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 
@@ -286,7 +286,6 @@ export const solicitudCambioCarrera = async (req, res) => {
 
 };
 
-
 //multer para recibir formulario de cambio de carrera
 export const contCambioCentro = multer({ storage: storage });
 //solicitudCambioCentro sin token usar numero de cuenta
@@ -320,7 +319,6 @@ export const solicitudCambioCentro = async (req, res) => {
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
 
 //multer para recibir formulario de Cancelacion Excepcional
 const cancelacionPdf = multer.diskStorage({
@@ -482,7 +480,8 @@ export const createMatricula = async (req, res) => {
       estado: "NSP",
       periodo: "I",
     });
-  
+    
+    infoSeccion.update({cupos:infoSeccion.dataValues.cupos-1});
     nuevaMatricula.save();
 
     return res.status(200).json({ message: "Clase añadida con exito"});
@@ -495,6 +494,7 @@ export const createMatricula = async (req, res) => {
 //Read
 export const readMatricula = async (req, res) => {
   try {
+    //0.numero de cuenta
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
@@ -505,11 +505,11 @@ export const readMatricula = async (req, res) => {
     if (infoMatricula === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
-    if (infoMatricula.dataValues.length === 0) {
+    if (infoMatricula.dataValues === "{}") {
       return res.status(400).json({ message: "El estudiante no tiene clases matriculadas" });
     }
 
-    return res.status(200).json({ message: "clase canceladas"});
+    return res.status(200).json({ message: "Clases Actuales", clasesMatriculadas: infoMatricula});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});
@@ -519,21 +519,21 @@ export const readMatricula = async (req, res) => {
 //delete
 export const deleteMatricula = async (req, res) => {
   try {
-    //0.cuenta 1.idClase 2.idseccion
+    //0.cuenta 1.idseccion
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
-    const infoSeccion    = await seccion.findOne({where:{idSeccion:respuestasForm[2]}});
+    const infoSeccion    = await seccion.findOne({where:{idSeccion:respuestasForm[1]}});
 
-    if (infoSeccion === undefined) {
+    if (infoSeccion === undefined || infoSeccion.dataValues.idSeccion === null) {
       return res.status(400).json({ message: "no existe esta seccion" });
     }
 
     const claseMatriculada = await matricula.findOne({where:
       {
-        numeroCuenta:respuestasForm[0],
-        idSeccion:infoSeccion.dataValues.idSeccion
+        idSeccion:infoSeccion.dataValues.idSeccion,
+        numeroCuenta:respuestasForm[0]
       }
     });
 
@@ -550,7 +550,46 @@ export const deleteMatricula = async (req, res) => {
   }
 };
 
+//Notas despues de evaluar
+export const notasDespuesEvaluacion = async (req, res) => {
+  try {
+    //0.cuenta 1.idseccion
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    const infoEvaluacion = await evaluacion.findAll({where:{idEstudiante:respuestasForm[0]}});
+    const infoClasesMatriculadas = await matricula.findAll({where:{numeroCuenta:respuestasForm[0]}});
+    
+    //obtengo todas las clases matriculadas
+    let clases = {}
+    forEach(infoClasesMatriculadas, async (conetnido) => {
+      clases[`${conetnido.dataValues.idMatricula}`] = conetnido.dataValues;
+    });
 
+    //obtengo todas las evaluaciones del estudiante
+    let evaluaciones = {}
+    forEach(infoEvaluacion, async (conetnido) => {
+      evaluaciones[`${conetnido.dataValues.idMatricula}`] = conetnido.dataValues;
+    });
+
+    //comparo cada clase matriculada con las evaluaciones de docente hechas del estudiante y si el valor de estado es true entonces se añaden a un array
+    let clasesEvaluadas = {}
+    forEach(infoClasesMatriculadas, async (conetnido) => {
+      if(evaluaciones[`${conetnido.dataValues.idMatricula}`].estado === true){
+        clasesEvaluadas[`${conetnido.dataValues.idMatricula}`] = conetnido.dataValues;
+      }else{
+        clasesEvaluadas[`${conetnido.dataValues.idMatricula}`] = "aun no a evaluado";
+      }
+    });
+
+
+    return res.status(200).json({ message: "Notas Disponibles", notasClases: clasesEvaluadas});
+  } catch (error) {
+    console.log(error);
+    return res.satatus(500).json({ message: "Error del servidor"});
+  }
+};
 /*
 metodo general para obtener info con token
 usar la funcion infoByToken para obtener la info del estudiante que se encuentra logeado que retorna un objeto con la info del estudiante
