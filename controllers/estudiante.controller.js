@@ -10,7 +10,6 @@ import { enviarCorreo } from "../helpers/mailerManager.js";
 import { asignatura } from "../models/asignaturaModel.js";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { forEach } from "underscore";
-import fs from "fs"
 import multer from "multer";
 import jwt from "jsonwebtoken";
 
