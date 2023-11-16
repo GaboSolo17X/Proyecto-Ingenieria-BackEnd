@@ -16,7 +16,8 @@ import {
     clasesMatricula,
     createMatricula,
     readMatricula,
-    deleteMatricula
+    deleteMatricula,
+    notasDespuesEvaluacion
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -37,5 +38,6 @@ router.get("/clasesMatricula",clasesMatricula);
 router.post("/createMatricula",createMatricula);
 router.get("/readMatricula",readMatricula);
 router.post("/deleteMatricula",deleteMatricula)
+router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 
 export default router;

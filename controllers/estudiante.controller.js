@@ -188,12 +188,17 @@ const InfoByToken = async (req, res) => {
 //obtener las notas obtenidas en las clase que matriculo durante el periodo.
 export const getNotasPeriodo = async (req, res) => {
   try {
-    const {numeroCuenta,periodo} = req.body;
+    let {numeroCuenta} = req.body;
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    }); 
+    numeroCuenta = respuestasForm[0];
+
     if( await estudiante.findOne({where:{numeroCuenta:numeroCuenta}}) === null){
       return res.status(400).json({ message: "El estudiante no existe" });
     }
     const notas = await matricula.findAll({
-      where: { periodo: periodo },
       where: { numeroCuenta: numeroCuenta }
     });
     if(notas.length === 0){
@@ -485,7 +490,7 @@ export const createMatricula = async (req, res) => {
     infoSeccion.update({cupos:infoSeccion.dataValues.cupos-1});
     nuevaMatricula.save();
 
-    return res.status(200).json({ message: "Clase añadida con exito"});
+    return res.status(200).json({ message: "Clase añadida con exito", clase: nuevaMatricula});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error en el servidor" });
@@ -544,7 +549,7 @@ export const deleteMatricula = async (req, res) => {
     
     await claseMatriculada.destroy();
 
-    return res.status(200).json({ message: "clase canceladas"});
+    return res.status(200).json({ message: "clase canceladas", clase: claseMatriculada});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});
@@ -554,7 +559,7 @@ export const deleteMatricula = async (req, res) => {
 //Notas despues de evaluar
 export const notasDespuesEvaluacion = async (req, res) => {
   try {
-    //0.cuenta 1.idseccion
+    //0.cuenta
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
