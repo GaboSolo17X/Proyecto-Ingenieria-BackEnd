@@ -228,7 +228,7 @@ async function infoAspirante(id) {
     const aspirantes = await aspirante.findOne({ where: { identidad: id } });
     //creacion del json
     const jsonAspirante = {};
-
+    console.log(jsonAspirante)
     //llenado del json con los datos del aspirantes obtenidos del objeto aspirantes
     jsonAspirante["nombre"] =
       aspirantes.dataValues.nombres + " " + aspirantes.dataValues.apellidos;

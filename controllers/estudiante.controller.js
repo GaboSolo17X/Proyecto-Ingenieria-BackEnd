@@ -71,6 +71,8 @@ export const getEstudianteByCuenta = async (req, res) => {
 export const actualizarCarreraEstudiante = async (req, res) => {
   try{
     const { numeroCuenta, carrera } = req.body;
+    console.log(numeroCuenta);
+    console.log(carrera);
     await estudiante.update(
       { carrera: carrera  , carreraSecundaria: null},
       { where: { numeroCuenta: numeroCuenta } }
