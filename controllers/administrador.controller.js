@@ -24,6 +24,7 @@ export const loginAdministrador = async (req, res) => {
         return res.status(200).json({ message: "Login exitoso", token, expiresIn, administrador: administradorLogin });
         
     } catch (error) {
-        
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
     }
 };

@@ -59,5 +59,6 @@ matricula.belongsTo(carrera, {foreignKey: 'nombreCarrera', targetKey: 'nombreCar
 matricula.belongsTo(estudiante, {foreignKey: 'numeroCuenta', targetKey: 'numeroCuenta'});
 
 
+
 matricula.sync();
 

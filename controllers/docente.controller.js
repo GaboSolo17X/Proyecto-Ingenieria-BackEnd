@@ -7,6 +7,7 @@ import multer from "multer";
 import { seccion } from "../models/seccionModel.js";
 import { matricula } from "../models/matriculaModel.js";
 import { estudiante } from "../models/estudianteModel.js";
+import { asignatura } from "../models/asignaturaModel.js";
 import exceljs from "exceljs";
 import path from "path";
 
@@ -66,7 +67,7 @@ export const registerDocente = async (req, res) => {
     try {
         const { nombres,apellidos,identidad, nombreCarrera, centroRegional, correo }= req.body;
         //En caso de necesitar escribir el correo en el formulario cambiar el correo por el que se recibe en el body y eliminar la linea de abajo
-        
+        const num = '0201'
         
         //Patron numero de docente 0201230519 0201<numero>
         const foto = req.file.path;
@@ -81,12 +82,12 @@ export const registerDocente = async (req, res) => {
         }
         
         //el numero de empleado se crea con el patron 0201000001, 0201000002, 0201000003 
-        let numeroEmpleadoDocente = ("000000" + (await docente.count()+1).toString()).slice(-6);
-        numeroEmpleadoDocente = `0201${numeroEmpleadoDocente}`;
+        let  numeroEmpleadoDocente = ("000000" + (await docente.count()+1).toString()).slice(-6);
         console.log(numeroEmpleadoDocente)
         if (docente.findOne({where: {numeroEmpleadoDocente}})) {
-            numeroEmpleadoDocente++
+            numeroEmpleadoDocente = ("000000" + (await docente.count()+2).toString()).slice(-6);
         }
+        numeroEmpleadoDocente = `${num}${numeroEmpleadoDocente}`;
 
 
         //<ultimos 5 digitos de la identidad><primer apellido><primer nombre>
@@ -143,10 +144,15 @@ export const getDocenteByNumeroEmpleado = async (req, res) => {
 export const getSeccionesDocente = async (req, res) => {
     const { numeroEmpleadoDocente } = req.body;
     const secciones = await seccion.findAll({ where: { numeroEmpleadoDocente } });
+    let asignaturas = []
+    for (const seccion of secciones) {
+         let asignaturasFound = await asignatura.findAll({ where: { idAsignatura: seccion.idAsignatura}})
+         asignaturas.push(asignaturasFound)
+    }
     if (secciones.length === 0) {
         return res.status(400).json({ message: "El docente no tiene secciones asignadas" });
     }
-    return res.status(200).json({ message: "Secciones encontradas", secciones });
+    return res.status(200).json({ message: "Secciones encontradas", secciones , asignaturas });
 
 };
 

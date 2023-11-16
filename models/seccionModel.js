@@ -10,6 +10,10 @@ export const seccion = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
+        nombreSeccion: {
+            type: DataTypes.STRING(4),
+            allowNull: false,
+        },
         idAsignatura:{
             type: DataTypes.INTEGER,
             allowNull: false,

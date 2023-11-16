@@ -1,9 +1,9 @@
 import express from 'express';
-import {actualizarVideo, informacionDocente} from '../controllers/seccion.controller.js';
+import {actualizarVideo, informacionDocente,formulario} from '../controllers/seccion.controller.js';
 const router = express.Router();
 
 //actualizar video de la seccion
-router.put('/actualizarVideo', actualizarVideo );
+router.put('/actualizarVideo',formulario.array(),actualizarVideo );
 router.post('/informacionDocente', informacionDocente)
 
 export default router;

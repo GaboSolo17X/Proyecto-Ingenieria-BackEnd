@@ -2,10 +2,24 @@ import { seccion } from "../models/seccionModel.js";
 import { matricula } from "../models/matriculaModel.js";
 import { docente } from "../models/docenteModel.js";
 import { asignatura } from "../models/asignaturaModel.js";
+import { forEach } from "underscore";
+import multer from "multer";
+
+const storage = multer.memoryStorage();
+export const formulario = multer({ storage: storage });
 
 export const actualizarVideo = async (req, res) => {
-  let { idSeccion, linkVideo } = req.body;
-  idSeccion = parseInt(idSeccion);
+  //let { idSeccion, linkVideo } = req.body;
+  const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+    console.log(respuestasForm[0],respuestasForm[1]);
+    let idSeccion = respuestasForm[0];
+    let linkVideo = respuestasForm[1];
+  
+
+  // idSeccion = parseInt(idSeccion);
   const seccionActualizada = await seccion.update(
     { linkVideo },
     { where: { idSeccion } }
