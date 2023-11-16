@@ -12,7 +12,12 @@ import {
     solicitudCambioCarrera, contCambioCarrera,
     solicitudCambioCentro,contCambioCentro,
     solicitudCancelacionClases,uploadPdf,
-    solicitudReposicion, contReposicion
+    solicitudReposicion, contReposicion,
+    clasesMatricula,
+    createMatricula,
+    readMatricula,
+    deleteMatricula,
+    notasDespuesEvaluacion
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -29,4 +34,10 @@ router.post("/solicitudCambioCarrera",contCambioCarrera.array(),solicitudCambioC
 router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCentro);
 router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
 router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
+router.get("/clasesMatricula",clasesMatricula);
+router.post("/createMatricula",createMatricula);
+router.get("/readMatricula",readMatricula);
+router.post("/deleteMatricula",deleteMatricula)
+router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
+
 export default router;
