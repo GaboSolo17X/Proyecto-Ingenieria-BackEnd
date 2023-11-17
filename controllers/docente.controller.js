@@ -116,7 +116,8 @@ export const registerDocente = async (req, res) => {
 export const getDocentes = async (req, res) => {
     try {
         if (await docente.count() === 0) return res.status(400).json({ message: "No hay docentes" });
-        return res.status(200).json(await docente.findAll());
+        const docentes = await docente.findAll({limit: 10, order: [['numeroEmpleadoDocente', 'DESC']]});
+        return res.status(200).json(docentes);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });
