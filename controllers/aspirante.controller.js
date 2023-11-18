@@ -21,6 +21,14 @@ export const createAspirante = async (req, res) => {
         const fotoCertificado = req.file.path;
         const pasoCarreraPrincipal = null;
 
+        //Validacion sobre si el aspirante ya existe dentro de la base de datos
+        const aspiranteExistente = await aspirante.findOne({ where: { identidad: identidad } });
+        if (aspiranteExistente) {
+            console.log(`El aspirante con numero de identidad ${identidad} ya existey esta es su info actual dentro de la base de datos ${aspiranteExistente.dataValues}`)
+            return res.status(400).json({ message: "El aspirante ya existe" });
+        }
+
+
         const newAspirante = new aspirante({
             identidad,
             nombres,
