@@ -126,7 +126,7 @@ export const subirArchivo = async (req, res) => {
               texto: "Felicidades, has aprobado el examen de admision",
               html: `
                               <h1>Felicidades ${aspiranteInfo.nombre}, has aprobado el examen de admision</h1>
-                              <h2> Esperamos que te encuentres muy bien nos alegra informarte que has sido aprovado el examen de admision y has sido aceptado en la carrera de ${aspiranteInfo.carrera} con los siguientes resultados</h2>    
+                              <h2> Esperamos que te encuentres muy bien nos alegra informarte que has sido aprobado el examen de admision y has sido aceptado en la carrera de ${aspiranteInfo.carrera} con los siguientes resultados</h2>    
                               <h2>Nota PAA: ${notaPAA}</h2>
                               
                               <h2>Te esperamos en el centro regional ${aspiranteInfo.centro}</h2>
@@ -141,7 +141,7 @@ export const subirArchivo = async (req, res) => {
                 "Lamentamos informate que no has aprobado el examen de admision",
               html: `
                               <h1>Un gusto saludarte ${aspiranteInfo.nombre}, lamentamos informate que no has aprobado el examen de admision</h1>
-                              <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrerae te esperamos que lo logros en otra ocsaion</h2>    
+                              <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrera te esperamos que lo logros en otra ocsaion</h2>    
                               <h2>Nota PAA: ${notaPAA}</h2>
                               
                               <h2>Te esperamos en los proximos examenes un fallo es el camino al exito</h2>
@@ -200,7 +200,7 @@ export const subirArchivo = async (req, res) => {
                 "Lamentamos informate que no has aprobado el examen de admision",
               html: `
                               <h1>Un gusto saludarte <strong>${aspiranteInfo.nombre}<strong>, lamentamos informate que no has aprobado el examen de admision</h1>
-                              <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrerae te esperamos que lo logros en otra ocsaion</h2>    
+                              <h2>Lastimosamente no has sido aprovado para ninguna de tus dos opciones de carrera te esperamos que lo logros en otra ocsaion</h2>    
                               <h2>Nota PAA: ${notaPAA}</h2>
                               <h2>Nota examen de carrera: ${notaExamen}</h2>
                               
