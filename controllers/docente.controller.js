@@ -167,13 +167,13 @@ export const descargarListadoEstudiantes = async (req, res) => {
     const worksheet = workbook.addWorksheet("Listado de estudiantes");
     const seccionFound = await matricula.findAll({include: seccion, where: {idSeccion}, attributes: ["numeroCuenta"]});
     for (const seccion of seccionFound) {
-        let estudianteFound = await estudiante.findOne({where: {numeroCuenta: seccion.dataValues.numeroCuenta}, attributes: ["nombres", "apellidos", 'identidad', 'correoPersonal'] });
+        let estudianteFound = await estudiante.findOne({where: {numeroCuenta: seccion.dataValues.numeroCuenta}, attributes: ["nombres", "apellidos", 'numeroCuenta', 'correoPersonal'] });
         datos.push(estudianteFound.dataValues);
     }
     worksheet.columns = [
         { header: "Nombres", key: "nombres", width: 30 },
         { header: "Apellidos", key: "apellidos", width: 30 },
-        { header: "Identidad", key: "identidad", width: 30 },
+        { header: "Numero de Cuenta", key: "numeroCuenta", width: 30 },
         { header: "Correo", key: "correoPersonal", width: 30 },
     ];
     worksheet.addRows(datos);
@@ -184,6 +184,34 @@ export const descargarListadoEstudiantes = async (req, res) => {
         return res.status(500).json({ message: "Error en el servidor" });
     });
 
+};
+
+export const getEstudiantesSeccion = async (req, res) => {
+    try {
+        const { idSeccion } = req.body;
+        const estudiantesSeccion = await matricula.findAll({ where: { idSeccion } });
+        const estudiantes = [];
+
+        for (const estudianteSeccion of estudiantesSeccion) {
+            const { numeroCuenta } = estudianteSeccion.dataValues;
+            
+            const estudianteFound = await estudiante.findOne({ where: { numeroCuenta } });
+            const { nombres, apellidos } = estudianteFound.dataValues;
+            console.log( nombres, apellidos)
+
+            estudiantes.push({ nombres, apellidos, numeroCuenta });
+            
+        }
+        
+
+        if (estudiantesSeccion.length === 0) {
+            return res.status(400).json({ message: "No hay estudiantes en la seccion" });
+        }
+        return res.status(200).json({ message: "Estudiantes encontrados", estudiantes });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
+    }
 };
 
 export const enviarListadoEstudiantes = async (direccion, req, res) => {
