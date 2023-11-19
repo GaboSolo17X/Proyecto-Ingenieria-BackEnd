@@ -502,20 +502,39 @@ export const readMatricula = async (req, res) => {
   try {
     //0.numero de cuenta
     const respuestasForm = [];
+    const clases = []
+    const idAsignaturas = []
+    const clasesMatriculadas = []
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
 
     const infoMatricula = await matricula.findAll({where:{numeroCuenta:respuestasForm[0]}});
-
+    
     if (infoMatricula === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
+      
+    //proceso para obtener las secciones a travez de las matriculas 
+    infoMatricula.forEach(element => {
+      //añado las id de las secciones a un array llamado idAsignaturas
+      clasesMatriculadas.push(element.dataValues);
+      idAsignaturas.push(element.dataValues.idSeccion);
+    })
+
+    //obtengo la informacion de las secciones a travez de las idAsignaturas
+    for(let i = 0; i < idAsignaturas.length; i++){
+      const infoSeccion = await seccion.findOne({where:{idSeccion:idAsignaturas[i]}});
+      clases.push(infoSeccion.dataValues);
+    }
+
+    
+    
     if (infoMatricula.dataValues === "{}") {
       return res.status(400).json({ message: "El estudiante no tiene clases matriculadas" });
     }
 
-    return res.status(200).json({ message: "Clases Actuales", clasesMatriculadas: infoMatricula});
+    return res.status(200).json({ message: "Clases Actuales", clasesMatriculadas: clases});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});
