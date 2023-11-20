@@ -5,7 +5,7 @@ import {
     getEstudianteByCuenta,
     actualizarCarreraEstudiante,
     passwordResetMail,
-    getInfoByToken,
+    getInfo,
     getNotasPeriodo,
     guardarEvaluacion,
     contUpload,
@@ -13,9 +13,9 @@ import {
     solicitudCambioCentro,contCambioCentro,
     solicitudCancelacionClases,uploadPdf,
     solicitudReposicion, contReposicion,
-    clasesMatricula,
+    clasesMatricula,contClasesMatricula,
     createMatricula,
-    readMatricula,
+    readMatricula,contReadMatricula,
     deleteMatricula,
     notasDespuesEvaluacion
 } from '../controllers/estudiante.controller.js';
@@ -27,16 +27,16 @@ router.get("/getestudiantes", getEstudiantes);
 router.get("/getestudiantes/bycuenta", getEstudianteByCuenta);
 router.post("/actualizarCarrera",actualizarCarreraEstudiante);
 router.post("/recuperacionClave",passwordResetMail);
-router.get("/getInfoByToken",getInfoByToken);
+router.get("/getInfo",getInfo);
 router.get("/getNotas",getNotasPeriodo);
 router.post("/evalucionDocente",contUpload.array(),guardarEvaluacion);
 router.post("/solicitudCambioCarrera",contCambioCarrera.array(),solicitudCambioCarrera);
 router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCentro);
 router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
 router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
-router.get("/clasesMatricula",clasesMatricula);
+router.post("/clasesMatricula",contClasesMatricula.array(),clasesMatricula);
 router.post("/createMatricula",createMatricula);
-router.get("/readMatricula",readMatricula);
+router.post("/readMatricula",contReadMatricula.array(),readMatricula);
 router.post("/deleteMatricula",deleteMatricula)
 router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 

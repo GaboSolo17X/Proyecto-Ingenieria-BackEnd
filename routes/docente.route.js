@@ -1,5 +1,15 @@
 import express from 'express';
-import { loginDocente,registerDocente,upload,getDocenteByNumeroEmpleado,getDocentes, descargarListadoEstudiantes ,getSeccionesDocente,getEstudiantesSeccion} from '../controllers/docente.controller.js';
+import { 
+    loginDocente,
+    registerDocente,
+    upload,
+    getDocenteByNumeroEmpleado,
+    getDocentes,
+    descargarListadoEstudiantes,
+    getSeccionesDocente,
+    getEstudiantesSeccion
+    
+} from '../controllers/docente.controller.js';
 
 const router = express.Router();
 
