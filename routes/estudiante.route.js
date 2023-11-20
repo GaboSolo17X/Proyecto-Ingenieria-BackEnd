@@ -17,7 +17,9 @@ import {
     createMatricula,
     readMatricula,contReadMatricula,
     deleteMatricula,
-    notasDespuesEvaluacion
+    notasDespuesEvaluacion,
+    getAsignaturasMatricula,contgetAsignaturasMatricula,
+    getSeccionesDisponibles,contgetSeccionesDisponibles
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -39,5 +41,7 @@ router.post("/createMatricula",createMatricula);
 router.post("/readMatricula",contReadMatricula.array(),readMatricula);
 router.post("/deleteMatricula",deleteMatricula)
 router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
+router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
+router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
 
 export default router;
