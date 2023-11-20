@@ -54,20 +54,28 @@ export const subirNota = async (req, res) => {
   try {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
+    console.log(idSeccion, arrayEstudiantesNota)
     for (const estudianteNota of arrayEstudiantesNota) {
       const { numeroCuenta, nota, estado } = estudianteNota;
 
       const findMatricula = await matricula.findOne({
-        where: { idSeccion: idSeccion, numeroCuenta: numeroCuenta },
+        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
       });
-      const { idAsignatura, periodo } = findMatricula.dataValues;
+      const { periodo } = findMatricula.dataValues;
+
+      const findSeccion = await seccion.findOne({
+        where: {idSeccion:findMatricula.idSeccion}
+      });
+
       const softDeleteMatricula = await matricula.destroy({
         where: { idSeccion: idSeccion, numeroCuenta: numeroCuenta },
       });
 
+      
+
       const historialSubir = {
         numeroCuenta: numeroCuenta,
-        idAsignatura: idAsignatura,
+        idAsignatura: findSeccion.dataValues.idAsignatura,
         calificacion: nota,
         estado: estado,
         periodo: periodo,
