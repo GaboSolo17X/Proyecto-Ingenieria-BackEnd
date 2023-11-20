@@ -9,7 +9,7 @@ import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
 import { asignatura } from "../models/asignaturaModel.js";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
-import { forEach } from "underscore";
+import { forEach, object } from "underscore";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 
@@ -149,16 +149,15 @@ export const passwordResetMail = async (req, res) => {
 };
 
 //obtener informacion del estudiante por medio del jwt
-export const getInfoByToken = async (req, res) => {
+export const getInfo = async (req, res) => {
   try {
-
-    //descoponemos el token 
-    const token = req.headers.authorization.split(" ")[1];
-
-    //sacamos el uid, iat, exp
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    }); 
+    
     const estudianteInfo = await estudiante.findOne({
-      where: { numeroCuenta: decoded.uid },
+      where: { numeroCuenta: respuestasForm[0] },
     }); 
     return res.status(200).json(estudianteInfo);
   } catch (error) {
@@ -346,12 +345,14 @@ export const solicitudCancelacionClases = async (req, res) => {
     //ultimo elemento: justificacion
     const respuestasForm = [];
     let clases = "";
-    const archivo = req.file.path;
     //paso el conetnido del formulario a un array
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     }); 
-
+    console.log(respuestasForm)
+    console.log(req.file)
+    const archivo = req.file.path;
+    
     //saco las clases del array y las paso al array clases
     for (let index = 1; index < respuestasForm.length-1; index++) {
       clases = clases + respuestasForm[index] + ",";
@@ -360,8 +361,14 @@ export const solicitudCancelacionClases = async (req, res) => {
     //info del estudiante y matricula
     const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
 
-    //creacion de la solicitud 
+    //confirmacion si el estudiante tiene la matricula 
+    if (estudianteMatricula === "undefine" || estudianteMatricula.dataValues.idMatricula == null){
+      console.log("no existe la matricula")
+      return res.status(400).json({message:"no existe una matricula"})
+    }
 
+    
+    //creacion de la solicitud 
     const nuevaSolicitud = await solicitud.create({
       tipoSolicitud: "Cancelacion Excepcional",
       recurso: archivo,
@@ -414,6 +421,8 @@ export const solicitudReposicion = async (req, res) => {
   }
 };
 
+export const  contClasesMatricula = multer({ storage: storage });
+
 export const clasesMatricula = async (req, res) => {
   try {
     const respuestasForm = [];
@@ -449,12 +458,25 @@ export const clasesMatricula = async (req, res) => {
 
     //las clases presentes en el historial las busco en el json de las clases de la carrera y las quito
     forEach(infoHistorial, async (conetnido) => {
-      delete clasesCarrera[conetnido.idAsignatura];
+      if(conetnido.estado === "APR"){
+        delete clasesCarrera[conetnido.idAsignatura];
+      }
     });
     
+    //Busco las secciones existentes en base al arreglo de clasesCarrera
+
+    
+    let secciones = {}
+    for(let i = 0; i < Object.keys(clasesCarrera).length; i++){
+      const infoSeccion = await seccion.findAll({where:{idAsignatura:Object.keys(clasesCarrera)[i]}});
+      secciones[`${clasesCarrera[`${Object.keys(clasesCarrera)[i]}`].nombreClase}`] = infoSeccion;
+      //secciones[`${Object.keys(clasesCarrera)[i]}`] = infoSeccion;
+
+    }
+
 
     //devuelve un json con todas las clases que puede matricular el estudiante sin contar las que estan en el historial
-    return res.status(200).json({ message: "Solicitud enviada con exito", clases : clasesCarrera});
+    return res.status(200).json({ message: "Solicitud enviada con exito", clases : secciones});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error en el servidor" });
@@ -498,6 +520,9 @@ export const createMatricula = async (req, res) => {
 };
 
 //Read
+
+export const contReadMatricula = multer({ storage: storage });
+
 export const readMatricula = async (req, res) => {
   try {
     //0.numero de cuenta
@@ -505,6 +530,8 @@ export const readMatricula = async (req, res) => {
     const clases = []
     const idAsignaturas = []
     const clasesMatriculadas = []
+    console.log(req.body)
+
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
@@ -525,15 +552,16 @@ export const readMatricula = async (req, res) => {
     //obtengo la informacion de las secciones a travez de las idAsignaturas
     for(let i = 0; i < idAsignaturas.length; i++){
       const infoSeccion = await seccion.findOne({where:{idSeccion:idAsignaturas[i]}});
-      clases.push(infoSeccion.dataValues);
+      const infoAsignatura = await asignatura.findOne({where:{idAsignatura:infoSeccion.dataValues.idAsignatura}});
+      let informacion = infoSeccion.dataValues
+      informacion.nombreClase = infoAsignatura.dataValues.nombreClase;
+      clases.push(informacion);
     }
-
     
-    
-    if (infoMatricula.dataValues === "{}") {
+    if (clases == []) {
       return res.status(400).json({ message: "El estudiante no tiene clases matriculadas" });
     }
-
+    console.log(clases)
     return res.status(200).json({ message: "Clases Actuales", clasesMatriculadas: clases});
   } catch (error) {
     console.log(error);
