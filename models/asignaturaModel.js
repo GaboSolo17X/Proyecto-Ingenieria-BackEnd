@@ -13,6 +13,10 @@ export const asignatura = sequelize.define(
             type: DataTypes.STRING(50),
             allowNull: false,
         },
+        codigoAsignatura:{
+            type: DataTypes.STRING(8),
+            allowNull: false,
+        },
         nombreClase: {
             type: DataTypes.STRING(50),
             allowNull: false,
@@ -34,6 +38,10 @@ export const asignatura = sequelize.define(
         bannerAsignatura: {
             type: DataTypes.STRING(200),
             allowNull: false,
+        },
+        requisitos:{
+            type: DataTypes.STRING(50),
+            allowNull: true,
         },
 
     },{
