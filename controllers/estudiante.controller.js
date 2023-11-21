@@ -430,7 +430,6 @@ export const clasesMatricula = async (req, res) => {
       respuestasForm.push(conetnido);
     });
     const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
-
     if (infoEstudiante === null || infoEstudiante === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
@@ -438,7 +437,6 @@ export const clasesMatricula = async (req, res) => {
     const infoHistorial = await historial.findAll ({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
     const infoClases = await asignatura.findAll({where:{nombreCarrera:infoEstudiante.dataValues.carrera}});
 
-    
     let  clasesCarrera   = {}
     let  clasesHistorial = {}
     
@@ -446,6 +444,8 @@ export const clasesMatricula = async (req, res) => {
     forEach(infoClases, async (conetnido) => {
       clasesCarrera[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
     });
+
+    
 
     //en caso de que el estudiante no tenga ninguna clase en el historial se le envia un json con las clases de la carrera
     if (infoHistorial.length === 0 || infoHistorial === null || infoHistorial === undefined) {
@@ -456,6 +456,7 @@ export const clasesMatricula = async (req, res) => {
       clasesHistorial[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
     });
 
+
     //las clases presentes en el historial las busco en el json de las clases de la carrera y las quito
     forEach(infoHistorial, async (conetnido) => {
       if(conetnido.estado === "APR"){
@@ -464,17 +465,14 @@ export const clasesMatricula = async (req, res) => {
     });
     
     //Busco las secciones existentes en base al arreglo de clasesCarrera
-
-    
     let secciones = {}
     for(let i = 0; i < Object.keys(clasesCarrera).length; i++){
       const infoSeccion = await seccion.findAll({where:{idAsignatura:Object.keys(clasesCarrera)[i]}});
-      secciones[`${clasesCarrera[`${Object.keys(clasesCarrera)[i]}`].nombreClase}`] = infoSeccion;
+      secciones[`${Object.keys(clasesCarrera)[i]}`] = infoSeccion;
       //secciones[`${Object.keys(clasesCarrera)[i]}`] = infoSeccion;
 
     }
-
-
+    console.log(secciones)
     //devuelve un json con todas las clases que puede matricular el estudiante sin contar las que estan en el historial
     return res.status(200).json({ message: "Solicitud enviada con exito", clases : secciones});
   } catch (error) {
