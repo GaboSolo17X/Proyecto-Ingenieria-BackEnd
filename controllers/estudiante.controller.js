@@ -9,7 +9,7 @@ import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
 import { asignatura } from "../models/asignaturaModel.js";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
-import { forEach } from "underscore";
+import { forEach, object } from "underscore";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 
@@ -645,3 +645,62 @@ export const notasDespuesEvaluacion = async (req, res) => {
 metodo general para obtener info con token
 usar la funcion infoByToken para obtener la info del estudiante que se encuentra logeado que retorna un objeto con la info del estudiante
 */
+
+export const contgetAsignaturasMatricula = multer({ storage: storage });
+
+export const getAsignaturasMatricula = async (req, res) => {
+  try {
+    //0.carrera
+    //1.cuenta
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+
+
+    //crea en un array llamado clases todas las asignaturas que pertenecen a la carrera
+    const asignaturas = await asignatura.findAll({where:{nombreCarrera:respuestasForm[0]}});
+    const historialClases = await historial.findAll({where:{numeroCuenta:respuestasForm[1]}});
+    let clases = {}
+    let clasesHistorial = {}
+
+    forEach(historialClases, async (conetnido) => {
+      clasesHistorial[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
+    });
+
+    forEach(asignaturas, async (conetnido) => {
+      if(clasesHistorial[`${conetnido.dataValues.idAsignatura}`] == undefined || clasesHistorial[`${conetnido.dataValues.idAsignatura}`].estado != "APR"){
+        clases[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
+      
+      };
+    });
+
+    if(asignaturas === undefined){
+      return res.status(400).json({ message: "No hay asignaturas disponibles" });
+    }
+
+    return res.status(200).json({ message: "Asignaturas Disponibles", asignaturas: clases});
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+};
+
+export const contgetSeccionesDisponibles = multer({ storage: storage });
+
+export const getSeccionesDisponibles = async (req, res) => {
+  try {
+    //0.asignatura
+    const respuestasForm = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasForm.push(conetnido);
+    });
+
+    const secciones = await seccion.findAll({where:{idAsignatura:respuestasForm[0]}});
+
+    return res.status(200).json({ message: "Secciones Disponibles", secciones: secciones});
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+}

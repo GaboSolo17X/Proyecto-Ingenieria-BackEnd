@@ -1,5 +1,7 @@
 import { seccion } from "../models/seccionModel.js";
 import { asignatura } from "../models/asignaturaModel.js";
+import { matricula } from "../models/matriculaModel.js";
+import { historial } from "../models/historialModel.js";
 import { docente } from "../models/docenteModel.js";
 
 export const obtenerClasesMatricula = async (req, res) => {
@@ -39,10 +41,55 @@ export const obtenerClasesMatricula = async (req, res) => {
       clasesForMatricula.push(clase);
     }
 
-    res.status(200).json({ clases: clasesForMatricula })
-
+    res.status(200).json({ clases: clasesForMatricula });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ mensaje: "Error al obtener las clases para matricula" });
+    res
+      .status(500)
+      .json({ mensaje: "Error al obtener las clases para matricula" });
+  }
+};
+
+export const subirNota = async (req, res) => {
+  try {
+    const { idSeccion, arrayEstudiantesNota } = req.body;
+
+    console.log(idSeccion, arrayEstudiantesNota)
+    for (const estudianteNota of arrayEstudiantesNota) {
+      const { numeroCuenta, nota, estado } = estudianteNota;
+
+      const findMatricula = await matricula.findOne({
+        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
+      });
+      const { periodo } = findMatricula.dataValues;
+
+      const findSeccion = await seccion.findOne({
+        where: {idSeccion:findMatricula.idSeccion}
+      });
+
+      const softDeleteMatricula = await matricula.destroy({
+        where: { idSeccion: idSeccion, numeroCuenta: numeroCuenta },
+      });
+
+      
+
+      const historialSubir = {
+        numeroCuenta: numeroCuenta,
+        idAsignatura: findSeccion.dataValues.idAsignatura,
+        calificacion: nota,
+        estado: estado,
+        periodo: periodo,
+      };
+
+      const updateHistorial = await historial.create(historialSubir);
+
+      console.log(softDeleteMatricula);
+      console.log(updateHistorial);
+    }
+
+    res.status(200).json({ mensaje: "Notas subidas correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ mensaje: "Error al subir nota" });
   }
 };
