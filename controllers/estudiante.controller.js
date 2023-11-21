@@ -470,7 +470,6 @@ export const clasesMatricula = async (req, res) => {
       const infoSeccion = await seccion.findAll({where:{idAsignatura:Object.keys(clasesCarrera)[i]}});
       secciones[`${Object.keys(clasesCarrera)[i]}`] = infoSeccion;
       //secciones[`${Object.keys(clasesCarrera)[i]}`] = infoSeccion;
-
     }
     console.log(secciones)
     //devuelve un json con todas las clases que puede matricular el estudiante sin contar las que estan en el historial
@@ -483,6 +482,7 @@ export const clasesMatricula = async (req, res) => {
 
 //CRUD Matricula
 //Create
+export const contCreateMatricula = multer({ storage: storage });
 export const createMatricula = async (req, res) => {
   try {
     //0.cuenta 1.idClase 2.idseccion
@@ -518,9 +518,7 @@ export const createMatricula = async (req, res) => {
 };
 
 //Read
-
 export const contReadMatricula = multer({ storage: storage });
-
 export const readMatricula = async (req, res) => {
   try {
     //0.numero de cuenta
@@ -568,6 +566,7 @@ export const readMatricula = async (req, res) => {
 };
 
 //delete
+export const contdeleteMatricula = multer({ storage: storage });
 export const deleteMatricula = async (req, res) => {
   try {
     //0.cuenta 1.idseccion
@@ -661,21 +660,25 @@ export const getAsignaturasMatricula = async (req, res) => {
     //crea en un array llamado clases todas las asignaturas que pertenecen a la carrera
     const asignaturas = await asignatura.findAll({where:{nombreCarrera:respuestasForm[0]}});
     const historialClases = await historial.findAll({where:{numeroCuenta:respuestasForm[1]}});
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[1]}});
     let clases = {}
     let clasesHistorial = {}
-
     forEach(historialClases, async (conetnido) => {
       clasesHistorial[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
     });
 
     forEach(asignaturas, async (conetnido) => {
-      if(clasesHistorial[`${conetnido.dataValues.idAsignatura}`] == undefined || clasesHistorial[`${conetnido.dataValues.idAsignatura}`].estado != "APR"){
-        clases[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
       
-      };
+      conetnido.dataValues.idCarrerasDisponibles.split(",").forEach(element => {
+        if(element == infoEstudiante.dataValues.carrera){
+          if(clasesHistorial[`${conetnido.dataValues.idAsignatura}`] == undefined || clasesHistorial[`${conetnido.dataValues.idAsignatura}`].estado != "APR"){
+            clases[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
+          };
+        }  
+      });
     });
 
-    if(asignaturas === undefined){
+    if(asignaturas == []){
       return res.status(400).json({ message: "No hay asignaturas disponibles" });
     }
 
@@ -686,17 +689,23 @@ export const getAsignaturasMatricula = async (req, res) => {
   }
 };
 
-export const contgetSeccionesDisponibles = multer({ storage: storage });
 
+
+//metodo para obtener todas las secciones de una clases solo pide el id de la clase
+export const contgetSeccionesDisponibles = multer({ storage: storage });
 export const getSeccionesDisponibles = async (req, res) => {
   try {
-    //0.asignatura
+    //0.idAsignatura
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
 
     const secciones = await seccion.findAll({where:{idAsignatura:respuestasForm[0]}});
+    
+    if(secciones.length == 0){
+      return res.status(200).json({ message: "No hay secciones disponibles" });
+    }
 
     return res.status(200).json({ message: "Secciones Disponibles", secciones: secciones});
   } catch (error) {

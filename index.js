@@ -17,6 +17,7 @@ import tokenRouter from "./routes/token.route.js";
 import aspiranteRouter from "./routes/aspirante.route.js";
 import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
+import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
 // import { asignatura } from "./models/asignaturaModel.js";
 // import { seccion } from "./models/seccionModel.js";
 // import { matricula } from "./models/matriculaModel.js";
@@ -68,7 +69,7 @@ app.use("/carreras", carrerasRouter);
 app.use("/token", tokenRouter);
 app.use("/matricula", matriculaRouter);
 app.use("/seccion", seccionRouter)
-
+app.use("/perfilEstudiante", perfilEstdudiante);
 // Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
 
