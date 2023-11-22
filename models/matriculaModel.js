@@ -49,8 +49,6 @@ export const matricula = sequelize.define(
                 },
             }
         },
-    }, {
-        timestamps: false,
     },
     {
         paranoid:   true
