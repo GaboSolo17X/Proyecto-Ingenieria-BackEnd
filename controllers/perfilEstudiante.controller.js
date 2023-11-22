@@ -1,5 +1,6 @@
 import {perfilEstudiante} from "../models/perfilEstudianteModel.js";
 import {fotoEstudiante} from "../models/fotoEstudianteModel.js";
+import {estudiante} from "../models/estudianteModel.js";
 import { find, forEach, isEmpty, object } from "underscore";
 import multer from "multer";
 
@@ -171,4 +172,25 @@ export const getFotosEstudianes = async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });
     }
+};
+
+export const actualizarLocalStorage = async (req, res) => {
+    try {
+      const { numeroCuenta } = req.body;
+      let estudianteLogin = await estudiante.findOne({where: { numeroCuenta: numeroCuenta }});
+      let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
+      let fotoPerfil = await fotoEstudiante.findOne({ where: { idfotoEstudiante: estudiantePerfil.dataValues.idfotoEstudiante }});
+      
+      
+    let infoEstudiante = estudianteLogin.dataValues;
+    infoEstudiante[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
+    
+    console.log(infoEstudiante)
+    return res
+      .status(200)
+      .json({infoEstudiante});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
 };
