@@ -29,7 +29,7 @@ export const loginEstudiante = async (req, res) => {
   try {
     
     const { numeroCuenta, claveEstudiante } = req.body;
-    let estudianteLogin = await estudiante.findOne({
+    let infoEstudiante = await estudiante.findOne({
       where: { numeroCuenta: numeroCuenta },
     });
     let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
@@ -51,8 +51,8 @@ export const loginEstudiante = async (req, res) => {
       estudiantePerfil.save();
     }
     
-    const hashedPassword = estudianteLogin.claveEstudiante;
-    if (!estudianteLogin) {
+    const hashedPassword = infoEstudiante.claveEstudiante;
+    if (!infoEstudiante) {
       return res.status(400).json({ message: "Credenciales Incorrectas" });
     }
     const respuestaPassword = await comparePassword(
@@ -63,16 +63,15 @@ export const loginEstudiante = async (req, res) => {
       return res.status(400).json({ message: "Credenciales Incorrectas" });
     }
 
-    const { token, expiresIn } = generateJWT(estudianteLogin.numeroCuenta);
-    generateRefreshJWT(estudianteLogin.numeroCuenta, res);
+    const { token, expiresIn } = generateJWT(infoEstudiante.numeroCuenta);
+    generateRefreshJWT(infoEstudiante.numeroCuenta, res);
 
-    let infoEstudiante = estudianteLogin.dataValues;
-    infoEstudiante[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
-
+    let estudianteLogin = infoEstudiante.dataValues;
+    estudianteLogin[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
     
     return res
       .status(200)
-      .json({ message: "Login exitoso", token, expiresIn, infoEstudiante});
+      .json({ message: "Login exitoso", token, expiresIn, estudianteLogin});
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error en el servidor" });
@@ -733,6 +732,15 @@ export const getSeccionesDisponibles = async (req, res) => {
     }
 
     return res.status(200).json({ message: "Secciones Disponibles", secciones: secciones});
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+}
+
+export const getIndiceAcademico = async (req,res) =>{
+  try {
+    
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});

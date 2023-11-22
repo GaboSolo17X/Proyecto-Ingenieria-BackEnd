@@ -179,7 +179,8 @@ export const actualizarLocalStorage = async (req, res) => {
       const { numeroCuenta } = req.body;
       let estudianteLogin = await estudiante.findOne({where: { numeroCuenta: numeroCuenta }});
       let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
-      let fotoPerfil = await fotoEstudiante.findOne({ where: { numeroCuenta: estudiantePerfil.dataValues.idfotoEstudiante }});
+      let fotoPerfil = await fotoEstudiante.findOne({ where: { idfotoEstudiante: estudiantePerfil.dataValues.idfotoEstudiante }});
+      
       
     let infoEstudiante = estudianteLogin.dataValues;
     infoEstudiante[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
