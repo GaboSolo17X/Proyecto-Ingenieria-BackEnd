@@ -7,7 +7,7 @@ import { docente } from "../models/docenteModel.js";
 export const obtenerClasesMatricula = async (req, res) => {
   try {
     const clasesMatricula = await seccion.findAll({
-      include: [asignatura, docente],
+      include: [asignatura, docente]
     });
     const clasesForMatricula = [];
 
@@ -59,7 +59,7 @@ export const subirNota = async (req, res) => {
       const { numeroCuenta, nota, estado } = estudianteNota;
 
       const findMatricula = await matricula.findOne({
-        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
+        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion}
       });
       const { periodo } = findMatricula.dataValues;
 
@@ -77,7 +77,7 @@ export const subirNota = async (req, res) => {
 
       const updateHistorial = await historial.create(historialSubir);
 
-      console.log(softDeleteMatricula);
+      
       console.log(updateHistorial);
     }
 
