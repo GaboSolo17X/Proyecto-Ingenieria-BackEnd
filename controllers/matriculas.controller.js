@@ -54,31 +54,15 @@ export const subirNota = async (req, res) => {
   try {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
-    console.log(idSeccion, arrayEstudiantesNota)
     for (const estudianteNota of arrayEstudiantesNota) {
       const { numeroCuenta, nota, estado } = estudianteNota;
 
-      const findMatricula = await matricula.findOne({
-        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
-      });
-      const { periodo } = findMatricula.dataValues;
+      const updateMatricula =  await matricula.update(
+        { nota: nota, estado: estado },
+        { where: { numeroCuenta: numeroCuenta, idSeccion: idSeccion } }
+      );
 
-      const findSeccion = await seccion.findOne({
-        where: {idSeccion:findMatricula.idSeccion}
-      });      
-
-      const historialSubir = {
-        numeroCuenta: numeroCuenta,
-        idAsignatura: findSeccion.dataValues.idAsignatura,
-        calificacion: nota,
-        estado: estado,
-        periodo: periodo,
-      };
-
-      const updateHistorial = await historial.create(historialSubir);
-
-      console.log(softDeleteMatricula);
-      console.log(updateHistorial);
+      console.log(updateMatricula);
     }
 
     res.status(200).json({ mensaje: "Notas subidas correctamente" });
@@ -86,4 +70,11 @@ export const subirNota = async (req, res) => {
     console.log(error);
     res.status(500).json({ mensaje: "Error al subir nota" });
   }
+};
+
+export const obtenerNotasSeccion = async (req, res) => {
+  const {idSeccion, numeroEmpleadoDocente} = req.body;
+  const seccionFound = await seccion.findAll({where:{idSeccion:idSeccion, numeroEmpleadoDocente:numeroEmpleadoDocente}});
+  const matriculasFound = await matricula.findAll({where:{idSeccion:idSeccion}});
+  return res.status(200).json({seccion:seccionFound, matriculas:matriculasFound});
 };
