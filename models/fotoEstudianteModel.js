@@ -8,6 +8,12 @@ export const fotoEstudiante = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
+        numeroCuenta: {
+            type: DataTypes.STRING(10),
+            allowNull: false,
+
+        }
+        ,
         fotoEstudiante: {
             type: DataTypes.STRING(200),
             allowNull: false

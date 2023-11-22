@@ -13,6 +13,10 @@ export const asignatura = sequelize.define(
             type: DataTypes.STRING(50),
             allowNull: false,
         },
+        codigoAsignatura:{
+            type: DataTypes.STRING(8),
+            allowNull: false,
+        },
         nombreClase: {
             type: DataTypes.STRING(50),
             allowNull: false,
@@ -35,6 +39,16 @@ export const asignatura = sequelize.define(
             type: DataTypes.STRING(200),
             allowNull: false,
         },
+        requisitos:{
+            type: DataTypes.STRING(50),
+            allowNull: true,
+        },
+        idCarrerasDisponibles:{
+            //se ponen los id de las carreras separados por comas
+            type: DataTypes.STRING(700),
+            allowNull: false,
+            defaultValue: "General"
+    },
 
     },{
         timestamps: false,

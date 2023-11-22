@@ -65,13 +65,7 @@ export const subirNota = async (req, res) => {
 
       const findSeccion = await seccion.findOne({
         where: {idSeccion:findMatricula.idSeccion}
-      });
-
-      const softDeleteMatricula = await matricula.destroy({
-        where: { idSeccion: idSeccion, numeroCuenta: numeroCuenta },
-      });
-
-      
+      });      
 
       const historialSubir = {
         numeroCuenta: numeroCuenta,

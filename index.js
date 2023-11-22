@@ -17,8 +17,9 @@ import tokenRouter from "./routes/token.route.js";
 import aspiranteRouter from "./routes/aspirante.route.js";
 import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
- //import { asignatura } from "./models/asignaturaModel.js";
- //import { seccion } from "./models/seccionModel.js";
+import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
+// import { asignatura } from "./models/asignaturaModel.js";
+// import { seccion } from "./models/seccionModel.js";
 // import { matricula } from "./models/matriculaModel.js";
  //import { listaEspera } from "./models/listaEsperaModel.js";
 // import { edificio } from "./models/edificioModel.js";
@@ -27,6 +28,7 @@ import seccionRouter from "./routes/seccion.router.js";
 // import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
 // import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
+//  import { estado_Proceso } from "./models/estadoProceso.js";
 
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
 const app = express();
@@ -67,7 +69,7 @@ app.use("/carreras", carrerasRouter);
 app.use("/token", tokenRouter);
 app.use("/matricula", matriculaRouter);
 app.use("/seccion", seccionRouter)
-
+app.use("/perfilEstudiante", perfilEstdudiante);
 // Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
 
