@@ -47,6 +47,11 @@ export const modPerfilEstudiante = async (req, res) => {
         });
         
         const infoPerfilEstudiante = await perfilEstudiante.findOne({ where: { numeroCuenta: formContenido[0]}});
+        const infoFotoEstudiante = await fotoEstudiante.findOne({ where: { idfotoEstudiante: formContenido[1]}});
+
+        if(infoPerfilEstudiante.dataValues.numeroCuenta !== infoFotoEstudiante.dataValues.numeroCuenta){
+            return res.status(400).json({ message: "Foto no pertenece a estudiante" });
+        }
         
         if (await fotoEstudiante.findOne({ where: { idfotoEstudiante: formContenido[1]}}) == null) {
             return res.status(400).json({ message: "Foto no existe" });
@@ -105,7 +110,7 @@ export const eliminarFoto = async (req, res) => {
         });
 
         
-        
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });

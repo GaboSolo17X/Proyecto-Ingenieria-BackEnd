@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.post("/perfilEstudianteById",contPerfilEstudianteById.array(),perfilEstudianteById);
 router.post("/modPerfilEstudiante",contModPerfilEstudiante.array(),modPerfilEstudiante);
-router.post("/añadirFoto",contAñadirFoto,añadirFoto);
+router.post("/addFoto",contAñadirFoto,añadirFoto);
 
 export default router;
