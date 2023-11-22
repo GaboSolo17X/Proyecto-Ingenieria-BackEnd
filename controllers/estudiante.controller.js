@@ -8,8 +8,10 @@ import { historial } from "../models/historialModel.js";
 import { comparePassword } from "../helpers/comparePassword.js";
 import { enviarCorreo } from "../helpers/mailerManager.js";
 import { asignatura } from "../models/asignaturaModel.js";
+import { perfilEstudiante } from "../models/perfilEstudianteModel.js";
+import { fotoEstudiante } from "../models/fotoEstudianteModel.js";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
-import { forEach, object } from "underscore";
+import { forEach, isEmpty, object } from "underscore";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 
@@ -30,6 +32,25 @@ export const loginEstudiante = async (req, res) => {
     let estudianteLogin = await estudiante.findOne({
       where: { numeroCuenta: numeroCuenta },
     });
+    let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
+    let fotoPerfil = await fotoEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
+    console.log(estudiantePerfil)
+
+    if (isEmpty(fotoPerfil || isEmpty(estudiantePerfil))) {
+      fotoPerfil = await fotoEstudiante.create({
+        numeroCuenta: numeroCuenta,
+        fotoEstudiante: "public/images/estudiantes/vacopio.jpg",
+      });
+      fotoPerfil.save();
+
+      estudiantePerfil = await perfilEstudiante.create({
+        numeroCuenta: numeroCuenta,
+        idFotoEstudiante: fotoPerfil.dataValues.idFotoEstudiante,
+        descripcion: "Sin descripcion",
+      });
+      estudiantePerfil.save();
+    }
+    
     const hashedPassword = estudianteLogin.claveEstudiante;
     if (!estudianteLogin) {
       return res.status(400).json({ message: "Credenciales Incorrectas" });
@@ -44,10 +65,14 @@ export const loginEstudiante = async (req, res) => {
 
     const { token, expiresIn } = generateJWT(estudianteLogin.numeroCuenta);
     generateRefreshJWT(estudianteLogin.numeroCuenta, res);
+
+    let infoEstudiante = estudianteLogin.dataValues;
+    infoEstudiante[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
+
     
     return res
       .status(200)
-      .json({ message: "Login exitoso", token, expiresIn, estudianteLogin });
+      .json({ message: "Login exitoso", token, expiresIn, infoEstudiante});
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error en el servidor" });
