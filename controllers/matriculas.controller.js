@@ -7,7 +7,7 @@ import { docente } from "../models/docenteModel.js";
 export const obtenerClasesMatricula = async (req, res) => {
   try {
     const clasesMatricula = await seccion.findAll({
-      include: [asignatura, docente],
+      include: [asignatura, docente]
     });
     const clasesForMatricula = [];
 
@@ -54,7 +54,6 @@ export const subirNota = async (req, res) => {
   try {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
-    console.log(idSeccion, arrayEstudiantesNota)
     for (const estudianteNota of arrayEstudiantesNota) {
       const { numeroCuenta, nota, estado } = estudianteNota;
 
@@ -86,4 +85,11 @@ export const subirNota = async (req, res) => {
     console.log(error);
     res.status(500).json({ mensaje: "Error al subir nota" });
   }
+};
+
+export const obtenerNotasSeccion = async (req, res) => {
+  const {idSeccion, numeroEmpleadoDocente} = req.body;
+  const seccionFound = await seccion.findAll({where:{idSeccion:idSeccion, numeroEmpleadoDocente:numeroEmpleadoDocente}});
+  const matriculasFound = await matricula.findAll({where:{idSeccion:idSeccion}});
+  return res.status(200).json({seccion:seccionFound, matriculas:matriculasFound});
 };

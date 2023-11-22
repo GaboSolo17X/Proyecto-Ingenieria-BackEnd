@@ -1,6 +1,7 @@
 import {perfilEstudiante} from "../models/perfilEstudianteModel.js";
 import {fotoEstudiante} from "../models/fotoEstudianteModel.js";
-import { find, forEach, object } from "underscore";
+import {estudiante} from "../models/estudianteModel.js";
+import { find, forEach, isEmpty, object } from "underscore";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -46,8 +47,35 @@ export const modPerfilEstudiante = async (req, res) => {
             formContenido.push(elemento)
         });
         
+        //verificar si existe fotoEstudiante o descripcion
+        if(isEmpty(formContenido[1]) && isEmpty(formContenido[2])){
+            return res.status(400).json({ message: "no hay nada que actualizar" });
+        }
+
         const infoPerfilEstudiante = await perfilEstudiante.findOne({ where: { numeroCuenta: formContenido[0]}});
+
+        if(isEmpty(formContenido[1]) && !isEmpty(formContenido[2])){
+            infoPerfilEstudiante.update({
+                descripcion: formContenido[2]
+            });
+            return res.status(200).json({ message: "Se actualizo la descripcion" });
+        };
+
         const infoFotoEstudiante = await fotoEstudiante.findOne({ where: { idfotoEstudiante: formContenido[1]}});
+
+        if(!isEmpty(formContenido[1]) && isEmpty(formContenido[2])){
+            if (infoFotoEstudiante == null) {
+                return res.status(400).json({ message: "Foto no existe" });
+            };
+            if(infoPerfilEstudiante.dataValues.numeroCuenta !== infoFotoEstudiante.dataValues.numeroCuenta){
+                return res.status(400).json({ message: "Foto no pertenece a estudiante" });
+            }
+            infoPerfilEstudiante.update({
+                idfotoEstudiante: formContenido[1]
+            });
+            return res.status(200).json({ message: "Se actualizo la foto" });
+        }
+
 
         if(infoPerfilEstudiante.dataValues.numeroCuenta !== infoFotoEstudiante.dataValues.numeroCuenta){
             return res.status(400).json({ message: "Foto no pertenece a estudiante" });
@@ -57,17 +85,14 @@ export const modPerfilEstudiante = async (req, res) => {
             return res.status(400).json({ message: "Foto no existe" });
         };
 
-        //verificar si existe fotoEstudiante o descripcion
-        if(isEmpty(!formContenido[1] && !formContenido[2])){
-            return res.status(400).json({ message: "no hay nada que actualizar" });
-        }
+        
         infoPerfilEstudiante.update({
             idfotoEstudiante: formContenido[1],
             descripcion: formContenido[2]
         });
 
         
-        console.log(infoPerfilEstudiante)
+        console.log(infoPerfilEstudiante.dataValues)
         return res.status(200).json({ message: "Perfil actualizado" });
     } catch (error) {
         console.log(error);
@@ -147,4 +172,25 @@ export const getFotosEstudianes = async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });
     }
+};
+
+export const actualizarLocalStorage = async (req, res) => {
+    try {
+      const { numeroCuenta } = req.body;
+      let estudianteLogin = await estudiante.findOne({where: { numeroCuenta: numeroCuenta }});
+      let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
+      let fotoPerfil = await fotoEstudiante.findOne({ where: { idfotoEstudiante: estudiantePerfil.dataValues.idfotoEstudiante }});
+      
+      
+    let infoEstudiante = estudianteLogin.dataValues;
+    infoEstudiante[`fotoPerfil`] = fotoPerfil.dataValues.fotoEstudiante
+    
+    console.log(infoEstudiante)
+    return res
+      .status(200)
+      .json({infoEstudiante});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
 };
