@@ -14,9 +14,9 @@ import {
     solicitudCancelacionClases,uploadPdf,
     solicitudReposicion, contReposicion,
     clasesMatricula,contClasesMatricula,
-    createMatricula,
+    createMatricula,contCreateMatricula,
     readMatricula,contReadMatricula,
-    deleteMatricula,
+    deleteMatricula,contdeleteMatricula,
     notasDespuesEvaluacion,
     getAsignaturasMatricula,contgetAsignaturasMatricula,
     getSeccionesDisponibles,contgetSeccionesDisponibles
@@ -37,9 +37,9 @@ router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCen
 router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
 router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
 router.post("/clasesMatricula",contClasesMatricula.array(),clasesMatricula);
-router.post("/createMatricula",createMatricula);
+router.post("/createMatricula",contCreateMatricula.array(),createMatricula);
 router.post("/readMatricula",contReadMatricula.array(),readMatricula);
-router.post("/deleteMatricula",deleteMatricula)
+router.post("/deleteMatricula",contdeleteMatricula.array(),deleteMatricula)
 router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
 router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
