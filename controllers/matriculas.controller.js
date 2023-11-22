@@ -55,7 +55,9 @@ export const subirNota = async (req, res) => {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
     console.log(idSeccion, arrayEstudiantesNota)
+
     for (const estudianteNota of arrayEstudiantesNota) {
+      
       const { numeroCuenta, nota, estado } = estudianteNota;
 
       const findMatricula = await matricula.findOne({
