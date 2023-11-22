@@ -72,7 +72,6 @@ export const modPerfilEstudiante = async (req, res) => {
 };
 
 export const contAñadirFoto = multer({ storage: storageFotoEstudiante }).single('fotoEstudiante');
-
 export const añadirFoto = async (req, res) => {
     try {
         //0.#cuentaEstudiante 1.fotoEstudiante
@@ -103,14 +102,22 @@ export const añadirFoto = async (req, res) => {
 export const contEliminarFoto = multer({ storage: storage });
 export const eliminarFoto = async (req, res) => {
     try {
-        //0.#cuentaEstudiante 1.fotoEstudiante
+        //0.#cuentaEstudiante 1.idfotoEstudiante
         const formContenido = []
         forEach(req.body,async (elemento) => {
             formContenido.push(elemento)
         });
 
+        const imagenEstudiante = await fotoEstudiante.findOne({ where: { idfotoEstudiante: formContenido[1]}});
+        if (imagenEstudiante == null) {
+            return res.status(400).json({ message: "Foto no existe" });
+        };
+        if (imagenEstudiante.dataValues.numeroCuenta !== formContenido[0]) {
+            return res.status(400).json({ message: "Foto no pertenece a estudiante" });
+        };
+        imagenEstudiante.destroy();
         
-
+        return res.status(200).json({ message: "Foto eliminada" });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });

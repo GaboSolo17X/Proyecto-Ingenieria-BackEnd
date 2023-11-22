@@ -2,7 +2,8 @@ import express from 'express';
 import {
     perfilEstudianteById,contPerfilEstudianteById,
     modPerfilEstudiante,contModPerfilEstudiante,
-    añadirFoto,contAñadirFoto
+    añadirFoto,contAñadirFoto,
+    eliminarFoto,contEliminarFoto
 } from "../controllers/perfilEstudiante.controller.js";
 
 const router = express.Router();
@@ -10,5 +11,6 @@ const router = express.Router();
 router.post("/perfilEstudianteById",contPerfilEstudianteById.array(),perfilEstudianteById);
 router.post("/modPerfilEstudiante",contModPerfilEstudiante.array(),modPerfilEstudiante);
 router.post("/addFoto",contAñadirFoto,añadirFoto);
+router.post("/deleteFoto",contEliminarFoto.array(),eliminarFoto);
 
 export default router;
