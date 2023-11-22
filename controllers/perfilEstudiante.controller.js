@@ -1,6 +1,6 @@
 import {perfilEstudiante} from "../models/perfilEstudianteModel.js";
 import {fotoEstudiante} from "../models/fotoEstudianteModel.js";
-import { forEach, object } from "underscore";
+import { find, forEach, object } from "underscore";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
@@ -57,6 +57,10 @@ export const modPerfilEstudiante = async (req, res) => {
             return res.status(400).json({ message: "Foto no existe" });
         };
 
+        //verificar si existe fotoEstudiante o descripcion
+        if(isEmpty(!formContenido[1] && !formContenido[2])){
+            return res.status(400).json({ message: "no hay nada que actualizar" });
+        }
         infoPerfilEstudiante.update({
             idfotoEstudiante: formContenido[1],
             descripcion: formContenido[2]
@@ -118,6 +122,27 @@ export const eliminarFoto = async (req, res) => {
         imagenEstudiante.destroy();
         
         return res.status(200).json({ message: "Foto eliminada" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
+    }
+};
+
+export const contGetFotosEstudianes = multer({ storage: storage });
+export const getFotosEstudianes = async (req, res) => {
+    try {
+        //numero de cuenta
+        const formContenido = []
+        forEach(req.body,async (elemento) => {
+            formContenido.push(elemento)
+        });
+
+        const fotosEstudiante = await fotoEstudiante.findAll({ where: { numeroCuenta: formContenido[0]}});
+        if(fotosEstudiante.length == 0){
+            return res.status(400).json({ message: "No hay fotos" });
+        }
+
+        return res.status(200).json({ fotos: fotosEstudiante });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });
