@@ -298,7 +298,7 @@ async function infoAspirante(id) {
   }
 }
 
-async function enviarCorreo(aspirante, info) {
+export async function enviarCorreo(aspirante, info) {
   //funcion para elementos generico de envio de correo
   try {
     const mailOptions = {

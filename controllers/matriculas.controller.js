@@ -3,6 +3,10 @@ import { asignatura } from "../models/asignaturaModel.js";
 import { matricula } from "../models/matriculaModel.js";
 import { historial } from "../models/historialModel.js";
 import { docente } from "../models/docenteModel.js";
+import { estudiante } from "../models/estudianteModel.js";
+import mailer from "../config/confMailer.js";
+
+
 
 export const obtenerClasesMatricula = async (req, res) => {
   try {
@@ -55,30 +59,32 @@ export const subirNota = async (req, res) => {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
     for (const estudianteNota of arrayEstudiantesNota) {
-      
       const { numeroCuenta, nota, estado } = estudianteNota;
 
-      const findMatricula = await matricula.findOne({
-        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
+      const updateMatricula =  await matricula.update(
+        { nota: nota, estado: estado },
+        { where: { numeroCuenta: numeroCuenta, idSeccion: idSeccion } }
+      );
+
+      const estudianteFound = await estudiante.findOne({where:{numeroCuenta:numeroCuenta}});
+      const { correoPersonal, nombres, apellidos } = estudianteFound.dataValues;
+      const estudianteInfo = {};
+      estudianteInfo["correo"] = correoPersonal;
+      estudianteInfo["nombre"] = nombres + " " + apellidos;
+
+
+
+      await enviarCorreo(estudianteInfo, {
+        asunto: "Notas del periodo",
+        texto:
+          "Lamentamos informate que no has aprobado el examen de admision",
+        html: `
+                        <h1>Un gusto saludarte <strong>${estudianteInfo.nombre}<strong>, enviamos este correo para informarle que las notas de sus respectivas</h1><br>
+                        <h1>claes ya se encuentran asignadas en su campus, por favor pasar a revisar por si hay cualquier error</h1>
+                        `,
       });
-      const { periodo } = findMatricula.dataValues;
 
-      const findSeccion = await seccion.findOne({
-        where: {idSeccion:findMatricula.idSeccion}
-      });      
 
-      const historialSubir = {
-        numeroCuenta: numeroCuenta,
-        idAsignatura: findSeccion.dataValues.idAsignatura,
-        calificacion: nota,
-        estado: estado,
-        periodo: periodo,
-      };
-
-      const updateHistorial = await historial.create(historialSubir);
-
-      console.log(softDeleteMatricula);
-      console.log(updateHistorial);
     }
 
     res.status(200).json({ mensaje: "Notas subidas correctamente" });
@@ -94,3 +100,19 @@ export const obtenerNotasSeccion = async (req, res) => {
   const matriculasFound = await matricula.findAll({where:{idSeccion:idSeccion}});
   return res.status(200).json({seccion:seccionFound, matriculas:matriculasFound});
 };
+
+export async function enviarCorreo(estudiantes, info) {
+  //funcion para elementos generico de envio de correo
+  try {
+    const mailOptions = {
+      from: "Registro" + "<" + process.env.EMAIL_USER + "@gmail.com" + ">",
+      to: `${estudiantes.correo}`,
+      subject: info.asunto,
+      Text: info.texto,
+      html: info.html,
+    };
+    await mailer.sendMail(mailOptions);
+  } catch (error) {
+    console.log(error);
+  }
+}
