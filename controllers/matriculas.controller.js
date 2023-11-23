@@ -7,7 +7,7 @@ import { docente } from "../models/docenteModel.js";
 export const obtenerClasesMatricula = async (req, res) => {
   try {
     const clasesMatricula = await seccion.findAll({
-      include: [asignatura, docente],
+      include: [asignatura, docente]
     });
     const clasesForMatricula = [];
 
@@ -58,12 +58,27 @@ export const subirNota = async (req, res) => {
       
       const { numeroCuenta, nota, estado } = estudianteNota;
 
-      const updateMatricula =  await matricula.update(
-        { nota: nota, estado: estado },
-        { where: { numeroCuenta: numeroCuenta, idSeccion: idSeccion } }
-      );
+      const findMatricula = await matricula.findOne({
+        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
+      });
+      const { periodo } = findMatricula.dataValues;
 
-      console.log(updateMatricula);
+      const findSeccion = await seccion.findOne({
+        where: {idSeccion:findMatricula.idSeccion}
+      });      
+
+      const historialSubir = {
+        numeroCuenta: numeroCuenta,
+        idAsignatura: findSeccion.dataValues.idAsignatura,
+        calificacion: nota,
+        estado: estado,
+        periodo: periodo,
+      };
+
+      const updateHistorial = await historial.create(historialSubir);
+
+      console.log(softDeleteMatricula);
+      console.log(updateHistorial);
     }
 
     res.status(200).json({ mensaje: "Notas subidas correctamente" });
