@@ -49,6 +49,16 @@ export const matricula = sequelize.define(
                 },
             }
         },
+        createdAt: {
+            allowNull: false,
+            defaultValue: new Date(),
+            type: DataTypes.DATE
+          },
+          updatedAt: {
+            allowNull: false,
+            defaultValue: new Date(),
+            type: DataTypes.DATE
+          }
     },{
         timestamps: false
     },
@@ -56,6 +66,8 @@ export const matricula = sequelize.define(
         paranoid:   true
     }
 );
+      paranoid:   true
+    
 
 matricula.belongsTo(seccion, {foreignKey: 'idSeccion', targetKey: 'idSeccion'});
 matricula.belongsTo(carrera, {foreignKey: 'nombreCarrera', targetKey: 'nombreCarrera'});
