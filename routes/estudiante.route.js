@@ -19,7 +19,8 @@ import {
     deleteMatricula,contdeleteMatricula,
     notasDespuesEvaluacion,
     getAsignaturasMatricula,contgetAsignaturasMatricula,
-    getSeccionesDisponibles,contgetSeccionesDisponibles
+    getSeccionesDisponibles,contgetSeccionesDisponibles,
+    getIndiceAcademico
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -43,5 +44,5 @@ router.post("/deleteMatricula",contdeleteMatricula.array(),deleteMatricula)
 router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
 router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
-
+router.get("/getIndiceAcademico",getIndiceAcademico)
 export default router;

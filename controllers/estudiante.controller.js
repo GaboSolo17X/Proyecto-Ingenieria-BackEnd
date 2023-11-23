@@ -10,6 +10,7 @@ import { enviarCorreo } from "../helpers/mailerManager.js";
 import { asignatura } from "../models/asignaturaModel.js";
 import { perfilEstudiante } from "../models/perfilEstudianteModel.js";
 import { fotoEstudiante } from "../models/fotoEstudianteModel.js";
+import {indiceAcademico} from "../models/indiceAcademicoModel.js";
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
 import { forEach, isEmpty, object } from "underscore";
 import multer from "multer";
@@ -740,7 +741,23 @@ export const getSeccionesDisponibles = async (req, res) => {
 
 export const getIndiceAcademico = async (req,res) =>{
   try {
+    const respuestasReq = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasReq.push(conetnido);
+    });
+
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasReq[0]}});
+    if (infoEstudiante === undefined) {
+      return res.status(400).json({ message: "El estudiante no existe" });
+    }
     
+    const indice = await indiceAcademico.findOne({where:{numeroCuenta:respuestasReq[0]}});
+    
+    if (indice === undefined) {
+      return res.status(400).json({ message: "El estudiante no tiene indice" });
+    }
+
+    return res.status(200).json({indiceAcademico: indice.dataValues.indiceGlobal});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});
