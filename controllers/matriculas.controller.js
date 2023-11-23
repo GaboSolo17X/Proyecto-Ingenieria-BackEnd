@@ -55,30 +55,14 @@ export const subirNota = async (req, res) => {
     const { idSeccion, arrayEstudiantesNota } = req.body;
 
     for (const estudianteNota of arrayEstudiantesNota) {
-      
       const { numeroCuenta, nota, estado } = estudianteNota;
 
-      const findMatricula = await matricula.findOne({
-        where: {  numeroCuenta: numeroCuenta ,idSeccion: idSeccion},
-      });
-      const { periodo } = findMatricula.dataValues;
+      const updateMatricula =  await matricula.update(
+        { nota: nota, estado: estado },
+        { where: { numeroCuenta: numeroCuenta, idSeccion: idSeccion } }
+      );
 
-      const findSeccion = await seccion.findOne({
-        where: {idSeccion:findMatricula.idSeccion}
-      });      
-
-      const historialSubir = {
-        numeroCuenta: numeroCuenta,
-        idAsignatura: findSeccion.dataValues.idAsignatura,
-        calificacion: nota,
-        estado: estado,
-        periodo: periodo,
-      };
-
-      const updateHistorial = await historial.create(historialSubir);
-
-      console.log(softDeleteMatricula);
-      console.log(updateHistorial);
+      console.log(updateMatricula);
     }
 
     res.status(200).json({ mensaje: "Notas subidas correctamente" });
