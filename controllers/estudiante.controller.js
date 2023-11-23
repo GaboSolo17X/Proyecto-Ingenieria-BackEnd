@@ -19,6 +19,8 @@ import jwt from "jsonwebtoken";
 import { carrera } from "../models/carreraModel.js";
 
 
+
+
 // correoPersonal , claveEstudiante
 
 
@@ -458,6 +460,8 @@ export const createMatricula = async (req, res) => {
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
+
+    console.log("aqui esta en el metodo create",respuestasForm)
     const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
     const infoAsignatura = await asignatura.findOne({where:{idAsignatura:respuestasForm[1]}});
     const infoSeccion    = await seccion.findOne({where:{idSeccion:respuestasForm[2]}});
@@ -465,18 +469,19 @@ export const createMatricula = async (req, res) => {
     if (infoEstudiante === undefined || infoAsignatura === undefined || infoSeccion === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
-    
-   
 
+    
+    
     const nuevaMatricula = await matricula.create({
       idSeccion: infoSeccion.dataValues.idSeccion,
-      nombreCarrera: infoAsignatura.dataValues.nombreCarrera,
+      nombreCarrera: infoEstudiante.dataValues.carrera,
       numeroCuenta: infoEstudiante.dataValues.numeroCuenta,
       calificacion: null,
       estado: "NSP",
       periodo: "I",
       
     });
+
     
     infoSeccion.update({cupos:infoSeccion.dataValues.cupos-1});
     nuevaMatricula.save();
@@ -497,7 +502,6 @@ export const readMatricula = async (req, res) => {
     const clases = []
     const idAsignaturas = []
     const clasesMatriculadas = []
-    console.log(req.body)
 
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
@@ -521,6 +525,8 @@ export const readMatricula = async (req, res) => {
       const infoSeccion = await seccion.findOne({where:{idSeccion:idAsignaturas[i]}});
       const infoAsignatura = await asignatura.findOne({where:{idAsignatura:infoSeccion.dataValues.idAsignatura}});
       let informacion = infoSeccion.dataValues
+      informacion.horaInicial = informacion.horaInicial.toISOString().split("T")[1].split(".")[0]
+      informacion.horaFinal = informacion.horaFinal.toISOString().split("T")[1].split(".")[0]
       informacion.nombreClase = infoAsignatura.dataValues.nombreClase;
       clases.push(informacion);
     }
@@ -528,7 +534,7 @@ export const readMatricula = async (req, res) => {
     if (clases == []) {
       return res.status(400).json({ message: "El estudiante no tiene clases matriculadas" });
     }
-    console.log(clases)
+    
     return res.status(200).json({ message: "Clases Actuales", clasesMatriculadas: clases});
   } catch (error) {
     console.log(error);
@@ -566,17 +572,19 @@ export const deleteMatricula = async (req, res) => {
     infoSeccion.update({cupos:infoSeccion.dataValues.cupos+1});
 
     const estudianteEnEspera = await listaEspera.findOne({where:{idSeccion:infoSeccion.dataValues.idSeccion}});
-    if(estudianteEnEspera.length() >= 1){
-      const estudiante = await estudiante.findOne({where:{numeroCuenta:estudianteEnEspera.dataValues.numeroCuenta}});
-      const matricula = await matricula.create({
-        idSeccion: infoSeccion.dataValues.idSeccion,
-        nombreCarrera: infoSeccion.dataValues.nombreCarrera,
-        numeroCuenta: estudiante.dataValues.numeroCuenta,
-        calificacion: null,
-        estado: "NSP",
-        periodo: "I",
-      });
-      estudianteEnEspera.destroy();
+    if(!isEmpty(estudianteEnEspera)){
+      if(estudianteEnEspera.length() >= 1){
+        const estudiante = await estudiante.findOne({where:{numeroCuenta:estudianteEnEspera.dataValues.numeroCuenta}});
+        const matricula = await matricula.create({
+          idSeccion: infoSeccion.dataValues.idSeccion,
+          nombreCarrera: infoSeccion.dataValues.nombreCarrera,
+          numeroCuenta: estudiante.dataValues.numeroCuenta,
+          calificacion: null,
+          estado: "NSP",
+          periodo: "I",
+        });
+        estudianteEnEspera.destroy();
+    }
       matricula.save();
       return res.status(200).json({ message: "clase cancelada y se puso a otro estudiante en su cupo", clase: claseMatriculada});
     }
@@ -662,6 +670,7 @@ export const getCarreraMatricula = async (req, res) => {
 };
 
 
+
 export const contgetAsignaturasMatricula = multer({ storage: storage });
 export const getAsignaturasMatricula = async (req, res) => {
   try {
@@ -672,6 +681,7 @@ export const getAsignaturasMatricula = async (req, res) => {
       respuestasForm.push(conetnido);
     });
 
+    console.log(req.body)
 
     //crea en un array llamado clases todas las asignaturas que pertenecen a la carrera
     const asignaturas = await asignatura.findAll({where:{nombreCarrera:respuestasForm[0]}});
@@ -715,10 +725,18 @@ export const getSeccionesDisponibles = async (req, res) => {
       respuestasForm.push(conetnido);
     });
 
-    const secciones = await seccion.findAll({where:{idAsignatura:respuestasForm[0]}});
+    const contenidoSecciones = await seccion.findAll({where:{idAsignatura:respuestasForm[0]}});
     
-    if(secciones.length == 0){
+    if(contenidoSecciones.length == 0){
       return res.status(200).json({ message: "No hay secciones disponibles" });
+    }
+    let secciones = []
+    for(let seccion of contenidoSecciones){
+      let infoSeccion = seccion.dataValues;
+      let infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:seccion.dataValues.numeroEmpleadoDocente}})
+      infoSeccion[`nombre`] = infoDocente.dataValues.nombres+" "+infoDocente.dataValues.apellidos
+      infoSeccion[`fotoDocente`] = infoDocente.dataValues.foto
+      secciones.push(infoSeccion)
     }
 
     return res.status(200).json({ message: "Secciones Disponibles", secciones: secciones});
@@ -751,8 +769,7 @@ export const getIndiceAcademico = async (req,res) =>{
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});
   }
-};
-
+}
 
 export const addListaEspera = async (req,res) =>{
   try {

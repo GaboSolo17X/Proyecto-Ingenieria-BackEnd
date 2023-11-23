@@ -41,10 +41,10 @@ router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
 router.post("/createMatricula",contCreateMatricula.array(),createMatricula);
 router.post("/readMatricula",contReadMatricula.array(),readMatricula);
 router.post("/deleteMatricula",contdeleteMatricula.array(),deleteMatricula)
-router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
+router.post("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
 router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
-router.get("/getIndiceAcademico",getIndiceAcademico),
-router.get("/getCarreraMatricula",getCarreraMatricula),
+router.post("/getIndiceAcademico",getIndiceAcademico),
+router.post("/getCarreraMatricula",getCarreraMatricula),
 router.post("/getInfoSeccion",getInfoSeccion)
 export default router;
