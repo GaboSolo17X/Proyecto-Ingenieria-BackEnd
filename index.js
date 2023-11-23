@@ -29,7 +29,7 @@ import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
 // import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
  //import { estado_Proceso } from "./models/estadoProceso.js";
- import { indiceAcademico } from "./models/indiceAcademicoModel.js";
+ //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
 
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
 const app = express();

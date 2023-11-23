@@ -13,14 +13,14 @@ import {
     solicitudCambioCentro,contCambioCentro,
     solicitudCancelacionClases,uploadPdf,
     solicitudReposicion, contReposicion,
-    clasesMatricula,contClasesMatricula,
     createMatricula,contCreateMatricula,
     readMatricula,contReadMatricula,
     deleteMatricula,contdeleteMatricula,
     notasDespuesEvaluacion,
     getAsignaturasMatricula,contgetAsignaturasMatricula,
     getSeccionesDisponibles,contgetSeccionesDisponibles,
-    getIndiceAcademico
+    getIndiceAcademico,
+    getCarreraMatricula
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -37,12 +37,12 @@ router.post("/solicitudCambioCarrera",contCambioCarrera.array(),solicitudCambioC
 router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCentro);
 router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
 router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
-router.post("/clasesMatricula",contClasesMatricula.array(),clasesMatricula);
 router.post("/createMatricula",contCreateMatricula.array(),createMatricula);
 router.post("/readMatricula",contReadMatricula.array(),readMatricula);
 router.post("/deleteMatricula",contdeleteMatricula.array(),deleteMatricula)
-router.get("/notasDespuesEvaluacion",notasDespuesEvaluacion);
+router.post("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
 router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
-router.get("/getIndiceAcademico",getIndiceAcademico)
+router.post("/getIndiceAcademico",getIndiceAcademico),
+router.post("/getCarreraMatricula",getCarreraMatricula)
 export default router;
