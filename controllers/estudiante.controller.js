@@ -528,6 +528,8 @@ export const createMatricula = async (req, res) => {
     if (infoEstudiante === undefined || infoAsignatura === undefined || infoSeccion === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
+
+    
     
     const nuevaMatricula = await matricula.create({
       idSeccion: infoSeccion.dataValues.idSeccion,
@@ -558,7 +560,6 @@ export const readMatricula = async (req, res) => {
     const clases = []
     const idAsignaturas = []
     const clasesMatriculadas = []
-    console.log(req.body)
 
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
@@ -582,7 +583,6 @@ export const readMatricula = async (req, res) => {
       const infoSeccion = await seccion.findOne({where:{idSeccion:idAsignaturas[i]}});
       const infoAsignatura = await asignatura.findOne({where:{idAsignatura:infoSeccion.dataValues.idAsignatura}});
       let informacion = infoSeccion.dataValues
-      console.log(informacion.horaInicial.toISOString().split("T")[1],informacion.horaFinal.toISOString().split("T")[1])
       informacion.horaInicial = informacion.horaInicial.toISOString().split("T")[1].split(".")[0]
       informacion.horaFinal = informacion.horaFinal.toISOString().split("T")[1].split(".")[0]
       informacion.nombreClase = infoAsignatura.dataValues.nombreClase;
@@ -630,17 +630,19 @@ export const deleteMatricula = async (req, res) => {
     infoSeccion.update({cupos:infoSeccion.dataValues.cupos+1});
 
     const estudianteEnEspera = await listaEspera.findOne({where:{idSeccion:infoSeccion.dataValues.idSeccion}});
-    if(estudianteEnEspera.length() >= 1){
-      const estudiante = await estudiante.findOne({where:{numeroCuenta:estudianteEnEspera.dataValues.numeroCuenta}});
-      const matricula = await matricula.create({
-        idSeccion: infoSeccion.dataValues.idSeccion,
-        nombreCarrera: infoSeccion.dataValues.nombreCarrera,
-        numeroCuenta: estudiante.dataValues.numeroCuenta,
-        calificacion: null,
-        estado: "NSP",
-        periodo: "I",
-      });
-      estudianteEnEspera.destroy();
+    if(!isEmpty(estudianteEnEspera)){
+      if(estudianteEnEspera.length() >= 1){
+        const estudiante = await estudiante.findOne({where:{numeroCuenta:estudianteEnEspera.dataValues.numeroCuenta}});
+        const matricula = await matricula.create({
+          idSeccion: infoSeccion.dataValues.idSeccion,
+          nombreCarrera: infoSeccion.dataValues.nombreCarrera,
+          numeroCuenta: estudiante.dataValues.numeroCuenta,
+          calificacion: null,
+          estado: "NSP",
+          periodo: "I",
+        });
+        estudianteEnEspera.destroy();
+    }
       matricula.save();
       return res.status(200).json({ message: "clase cancelada y se puso a otro estudiante en su cupo", clase: claseMatriculada});
     }
@@ -881,6 +883,35 @@ export const deleteListaEspera = async (req,res) =>{
     await infoListaEspera.destroy();
 
     return res.status(200).json({ message: "Se ha eliminado de la lista de espera" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+};
+
+export const getInfoSeccion = async (req,res) =>{
+  try {
+    //0.idSeccion
+    const respuestasReq = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasReq.push(conetnido);
+    });
+
+
+    const infoSeccion = await seccion.findOne({where:{idSeccion:respuestasReq[0]}});
+    const infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:infoSeccion.dataValues.numeroEmpleadoDocente}});
+
+    if (infoSeccion === undefined || infoDocente === undefined) {
+      return res.status(400).json({ message: "La seccion o el docente no existe" });
+    }
+
+    let info = {}
+    info["nombre"] = infoDocente.dataValues.nombres+" "+infoDocente.dataValues.apellidos;
+    info["fotoDocente"] = infoDocente.dataValues.foto;
+    info["videoSeccion"] = infoSeccion.dataValues.linkVideo;
+    console.log(info)
+
+    return res.status(200).json({infoDocenteSeccion: info});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error del servidor"});

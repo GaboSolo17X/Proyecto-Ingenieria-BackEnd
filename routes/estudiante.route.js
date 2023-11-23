@@ -20,7 +20,8 @@ import {
     getAsignaturasMatricula,contgetAsignaturasMatricula,
     getSeccionesDisponibles,contgetSeccionesDisponibles,
     getIndiceAcademico,
-    getCarreraMatricula
+    getCarreraMatricula,
+    getInfoSeccion
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -44,5 +45,6 @@ router.post("/notasDespuesEvaluacion",notasDespuesEvaluacion);
 router.post("/getAsignaturasMatricula",contgetAsignaturasMatricula.array(),getAsignaturasMatricula);
 router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSeccionesDisponibles);
 router.post("/getIndiceAcademico",getIndiceAcademico),
-router.post("/getCarreraMatricula",getCarreraMatricula)
+router.post("/getCarreraMatricula",getCarreraMatricula),
+router.post("/getInfoSeccion",getInfoSeccion)
 export default router;
