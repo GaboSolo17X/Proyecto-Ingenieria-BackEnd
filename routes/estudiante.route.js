@@ -21,7 +21,10 @@ import {
     getSeccionesDisponibles,contgetSeccionesDisponibles,
     getIndiceAcademico,
     getCarreraMatricula,
-    getInfoSeccion
+    getInfoSeccion,
+    addListaEspera,
+    deleteListaEspera,
+    getListaEspera
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -47,4 +50,8 @@ router.post("/getSeccionesDisponibles",contgetSeccionesDisponibles.array(),getSe
 router.post("/getIndiceAcademico",getIndiceAcademico),
 router.post("/getCarreraMatricula",getCarreraMatricula),
 router.post("/getInfoSeccion",getInfoSeccion)
+router.post("/addListaEspera",addListaEspera)
+router.post("/deleteListaEspera",deleteListaEspera)
+router.post("/getListaEspera",getListaEspera)
+
 export default router;

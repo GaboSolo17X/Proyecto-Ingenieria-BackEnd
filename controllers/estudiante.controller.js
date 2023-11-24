@@ -529,8 +529,22 @@ export const createMatricula = async (req, res) => {
       return res.status(400).json({ message: "El estudiante no existe" });
     }
 
+    //verificar si el estudiante ya tiene la clase matriculada
+    const verificacion = await matricula.findOne({where:{idSeccion:respuestasForm[2]}})
+    if ( verificacion !== null) {
+      return res.status(400).json({ message: "El estudiante ya tiene esta clase matriculada" });
+    }
+    //verificar que las otras clases matriculadas no tengan el mismo horario
+    const clasesMatriculadas = await matricula.findAll({where:{numeroCuenta:respuestasForm[0]}});
+    for(let clase of clasesMatriculadas){
+      const infoSeccionMatriculada = await seccion.findOne({where:{idSeccion:clase.dataValues.idSeccion}});
+      if(infoSeccionMatriculada.dataValues.horaInicial == infoSeccion.dataValues.horaInicial ){
+        return res.status(400).json({ message: "Conflicto en el horario" });
+      }
+    }
+
     
-    
+
     const nuevaMatricula = await matricula.create({
       idSeccion: infoSeccion.dataValues.idSeccion,
       nombreCarrera: infoEstudiante.dataValues.carrera,
@@ -538,13 +552,12 @@ export const createMatricula = async (req, res) => {
       calificacion: null,
       estado: "NSP",
       periodo: "I",
+      
     });
 
-    
-    infoSeccion.update({cupos:infoSeccion.dataValues.cupos-1});
-    nuevaMatricula.save();
-
-    return res.status(200).json({ message: "Clase añadida con exito", clase: nuevaMatricula});
+      infoSeccion.update({cupos:infoSeccion.dataValues.cupos-1});
+      nuevaMatricula.save();
+      return res.status(200).json({ message: "Clase matriculada", clase: nuevaMatricula});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error en el servidor" });
@@ -739,9 +752,6 @@ export const getAsignaturasMatricula = async (req, res) => {
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
-
-    console.log(req.body)
-
     //crea en un array llamado clases todas las asignaturas que pertenecen a la carrera
     const asignaturas = await asignatura.findAll({where:{nombreCarrera:respuestasForm[0]}});
     const historialClases = await historial.findAll({where:{numeroCuenta:respuestasForm[1]}});
@@ -751,9 +761,7 @@ export const getAsignaturasMatricula = async (req, res) => {
     forEach(historialClases, async (conetnido) => {
       clasesHistorial[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
     });
-
     forEach(asignaturas, async (conetnido) => {
-      
       conetnido.dataValues.idCarrerasDisponibles.split(",").forEach(element => {
         if(element == infoEstudiante.dataValues.carrera){
           if(clasesHistorial[`${conetnido.dataValues.idAsignatura}`] == undefined || clasesHistorial[`${conetnido.dataValues.idAsignatura}`].estado != "APR"){
@@ -762,7 +770,24 @@ export const getAsignaturasMatricula = async (req, res) => {
         }  
       });
     });
-
+    //sacar del historial todos los codigos de asignaturas de las clases del historial
+    let requisitosCompletados = []
+    for(let clase of historialClases){
+      requisitosCompletados.push(clase.dataValues.idAsignatura)
+    }
+    //comparar los requisitos de cada clase con los requisitos completados por el estudiante
+    console.log(clases)
+    for (let clase in clases) {
+      console.log(clases[clase].requisitos)
+      if(clases[clase].requisitos == "General" || clases[clase].requisitos == "general" ){
+        continue;
+      }
+      for(let requisito of clases[clase].requisitos.split(",")){
+        if(requisitosCompletados.includes(requisito) == false && requisito != null){
+          delete clases[clase]
+        }
+      }
+    }
     if(asignaturas == []){
       return res.status(400).json({ message: "No hay asignaturas disponibles" });
     }
@@ -874,6 +899,8 @@ export const deleteListaEspera = async (req,res) =>{
       respuestasReq.push(conetnido);
     });
 
+    console.log(respuestasReq)
+
     const infoListaEspera = await listaEspera.findOne({where:{idListaEspera:respuestasReq[0]}});
 
     if (infoListaEspera === undefined) {
@@ -888,6 +915,44 @@ export const deleteListaEspera = async (req,res) =>{
     return res.status(500).json({ message: "Error del servidor"});
   }
 };
+
+export const getListaEspera = async (req,res) =>{
+  try {
+    //0.numeroCuenta
+    const respuestasReq = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasReq.push(conetnido);
+    });
+    //nombreClase, Aula, Edificio, Dias, HoraInicio, HoraFinal
+    const clasesEspera = await listaEspera.findAll({where:{numeroCuenta:respuestasReq[0]}});
+    if (clasesEspera === undefined) {
+      return res.status(400).json({ message: "El estudiante no existe" });
+    }
+
+    
+    let listaEsperaEstudiante = []
+    for(let registro of clasesEspera){
+      const infoSeccion = await seccion.findOne({where:{idSeccion:registro.dataValues.idSeccion}});
+      const infoAsignatura = await asignatura.findOne({where:{idAsignatura:infoSeccion.dataValues.idAsignatura}});
+      let info = {}
+      info["idListaEspera"] = registro.dataValues.idListaEspera
+      info["nombreClase"] = infoAsignatura.dataValues.nombreClase;
+      info["Aula"] = infoSeccion.dataValues.aula;
+      info["Edificio"] = infoSeccion.dataValues.edificio;
+      info["Dias"] = infoSeccion.dataValues.dias;
+      info["HoraInicio"] = infoSeccion.dataValues.horaInicial.toISOString().split("T")[1].split(".")[0]
+      info["HoraFinal"] = infoSeccion.dataValues.horaFinal.toISOString().split("T")[1].split(".")[0];
+      listaEsperaEstudiante.push(info);
+    }
+
+    console.log(listaEsperaEstudiante)
+    return res.status(200).json({ListaDeClasesEnEspera: listaEsperaEstudiante});
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+};
+
 
 export const getInfoSeccion = async (req,res) =>{
   try {
