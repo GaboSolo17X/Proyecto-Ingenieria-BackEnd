@@ -20,16 +20,8 @@ import jwt from "jsonwebtoken";
 import { carrera } from "../models/carreraModel.js";
 
 
-
-
-// correoPersonal , claveEstudiante
-
-
-
 const storage = multer.memoryStorage(); // Puedes cambiar esto según tus necesidades
 export const  contUpload = multer({ storage: storage });
-
-
 
 export const loginEstudiante = async (req, res) => {
   try {
@@ -1004,7 +996,6 @@ export const getListaEspera = async (req,res) =>{
   }
 };
 
-
 export const getInfoSeccion = async (req,res) =>{
   try {
     //0.idSeccion
@@ -1033,7 +1024,6 @@ export const getInfoSeccion = async (req,res) =>{
     return res.status(500).json({ message: "Error del servidor"});
   }
 };
-
 
 export const clasesCanceladas = async (req, res) =>{
   try {
@@ -1093,3 +1083,37 @@ export const getInfoEvaluacion = async (req,res) =>{
     return res.status(500).json({ message: "Error del servidor"});
   }
 };
+
+export const infoCertificado = async (req,res) =>{
+  try {
+    //0.numeroCuenta
+    const respuestasReq = [];
+    forEach(req.body, async (conetnido) => {
+      respuestasReq.push(conetnido);
+    });
+
+    const infoSolisitud = []
+    const infoHistorial = await historial.findAll({where:{numeroCuenta:respuestasReq[0]}});
+
+    if(isNull(infoHistorial)){
+      return res.status(400).json({ message: "no hay clases en el historial" });
+    }
+
+    forEach(infoHistorial, async (registro) => {
+      let info = {}
+      const infoAsignatura = await asignatura.findOne({where:{idAsignatura:registro.dataValues.idAsignatura}});
+      info["name"] = infoAsignatura.dataValues.codigoAsignatura
+      info["asignatura"] = upperCase(infoAsignatura.dataValues.nombreClase)
+      info["cali"] = registro.dataValues.calificacion
+      info["uv"] = infoAsignatura.dataValues.uv
+      info["periodo"] = registro.dataValues.periodo.split("-")[1]
+      info["anio"] = registro.dataValues.periodo.split("-")[0]
+      infoSolisitud.push(info)
+    });
+
+    return res.status(200).json({infoCertificado: infoSolisitud});
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: "Error del servidor"});
+  }
+}
