@@ -26,7 +26,8 @@ import {
     deleteListaEspera,
     getListaEspera,
     clasesCanceladas,
-    getInfoEvaluacion
+    getInfoEvaluacion,
+    infoCertificado
 } from '../controllers/estudiante.controller.js';
 
 const router = express.Router();
@@ -56,7 +57,8 @@ router.post("/addListaEspera",addListaEspera);
 router.post("/deleteListaEspera",deleteListaEspera);
 router.post("/getListaEspera",getListaEspera);
 router.post("/clasesCanceladas",clasesCanceladas);
-router.post("/getInfoEvaluacion",getInfoEvaluacion)
+router.post("/getInfoEvaluacion",getInfoEvaluacion);
+router.post("/infoCertificado",infoCertificado);
 
 
 export default router;
