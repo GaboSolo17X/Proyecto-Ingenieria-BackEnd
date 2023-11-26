@@ -14,7 +14,7 @@ import {indiceAcademico} from "../models/indiceAcademicoModel.js";
 import { listaEspera } from "../models/listaEsperaModel.js";
 import {matriculaCancelada} from "../models/matriculaCanceladaModel.js"
 import { generateJWT, generateRefreshJWT } from "../helpers/tokenManager.js";
-import { forEach, isEmpty, isNull,object } from "underscore";
+import { forEach, isEmpty, isNull,object,isUndefined } from "underscore";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 import { carrera } from "../models/carreraModel.js";
@@ -729,6 +729,8 @@ export const notasDespuesEvaluacion = async (req, res) => {
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
+
+    console.log(respuestasForm)
     const infoEvaluacion = await evaluacion.findAll({where:{idEstudiante:respuestasForm[0]}});
     const infoClasesMatriculadas = await matricula.findAll({where:{numeroCuenta:respuestasForm[0]}});
     
@@ -743,11 +745,21 @@ export const notasDespuesEvaluacion = async (req, res) => {
     forEach(infoEvaluacion, async (conetnido) => {
       evaluaciones[`${conetnido.dataValues.idMatricula}`] = conetnido.dataValues;
     });
+    
+    if(isEmpty(evaluaciones)){
+      return res.status(400).json({ message: "Aun no hay evaluaciones"});
+    }
+
 
     //comparo cada clase matriculada con las evaluaciones de docente hechas del estudiante y si el valor de estado es true entonces se añaden a un array
+    
     let clasesEvaluadas = infoClasesMatriculadas
-    for(let conetnido of infoClasesMatriculadas){
-      if(evaluaciones[`${conetnido.dataValues.idMatricula}`].estado === false){
+    for(let contenido of infoClasesMatriculadas){
+      //console.log(evaluaciones[`${contenido.dataValues.idMatricula}`])
+      if(isUndefined(evaluaciones[`${contenido.dataValues.idMatricula}`])){
+        return res.status(400).json({ message: "Aun no a realizado todas sus evaluaciones"});
+      }
+      if(evaluaciones[`${contenido.dataValues.idMatricula}`].estado === false){
         return res.status(400).json({ message: "Aun no a realizado todas sus evaluaciones"});
       }
     };
@@ -756,7 +768,7 @@ export const notasDespuesEvaluacion = async (req, res) => {
     return res.status(200).json({ message: "Notas Disponibles", notasClases: clasesEvaluadas});
   } catch (error) {
     console.log(error);
-    return res.satatus(500).json({ message: "Error del servidor"});
+    return res.status(500).json({ message: "Error del servidor"});
   }
 };
 /*
