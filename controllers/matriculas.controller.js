@@ -56,15 +56,21 @@ export const obtenerClasesMatricula = async (req, res) => {
 
 export const subirNota = async (req, res) => {
   try {
-    const { idSeccion, arrayEstudiantesNota } = req.body;
+    const { idSeccion, arrayEstudiantesNota, nombreClase } = req.body;
 
     for (const estudianteNota of arrayEstudiantesNota) {
       const { numeroCuenta, nota, estado } = estudianteNota;
 
+      console.log(numeroCuenta)
+      console.log(nota)
+      console.log(estado)
+
       const updateMatricula =  await matricula.update(
-        { nota: nota, estado: estado },
+        { calificacion: nota, estado: estado },
         { where: { numeroCuenta: numeroCuenta, idSeccion: idSeccion } }
       );
+
+      console.log(updateMatricula);
 
       const estudianteFound = await estudiante.findOne({where:{numeroCuenta:numeroCuenta}});
       const { correoPersonal, nombres, apellidos } = estudianteFound.dataValues;
@@ -78,9 +84,28 @@ export const subirNota = async (req, res) => {
         asunto: "Notas del periodo",
         texto:
           "Lamentamos informate que no has aprobado el examen de admision",
-        html: `
-                        <h1>Un gusto saludarte <strong>${estudianteInfo.nombre}<strong>, enviamos este correo para informarle que las notas de sus respectivas</h1><br>
-                        <h1>claes ya se encuentran asignadas en su campus, por favor pasar a revisar por si hay cualquier error</h1>
+        html: `<html>
+        <head>
+          <style>
+            body {
+              font-family: 'Arial', sans-serif;
+              padding: 20px;
+            }
+            h1 {
+              color: #333;
+            }
+            p {
+              font-size: 16px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Un gusto saludarte, <strong>${estudianteInfo.nombre}</strong></h1>
+          <p>Enviamos este correo para informarte que tu nota de ${nombreClase} ya se encuentra en el sistema de registro.</p>
+          <p>Por favor, si aún no has evaluado a tus docentes, completa las mismas para poder ver las notas de todas tus clases.</p>
+          <p>Sistema Registro UNAH</p>
+        </body>
+      </html>
                         `,
       });
 
