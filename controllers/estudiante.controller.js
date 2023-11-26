@@ -686,7 +686,7 @@ export const notasDespuesEvaluacion = async (req, res) => {
 
     //comparo cada clase matriculada con las evaluaciones de docente hechas del estudiante y si el valor de estado es true entonces se añaden a un array
     
-    let clasesEvaluadas = infoClasesMatriculadas
+    let clasesEvaluadas = []
     for(let contenido of infoClasesMatriculadas){
       //console.log(evaluaciones[`${contenido.dataValues.idMatricula}`])
       if(isUndefined(evaluaciones[`${contenido.dataValues.idMatricula}`])){
@@ -695,6 +695,22 @@ export const notasDespuesEvaluacion = async (req, res) => {
       if(evaluaciones[`${contenido.dataValues.idMatricula}`].estado === false){
         return res.status(400).json({ message: "Aun no a realizado todas sus evaluaciones"});
       }
+      const infoSeccion = await seccion.findOne({where:{idSeccion:contenido.dataValues.idSeccion}});
+      const infoAsignatura = await asignatura.findOne({where:{idAsignatura:infoSeccion.dataValues.idAsignatura}});
+      const infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:infoSeccion.dataValues.numeroEmpleadoDocente}});
+
+      let registro = {}
+
+      registro["codigo"] = infoAsignatura.dataValues.codigoAsignatura
+      registro["asignatura"] = infoAsignatura.dataValues.nombreClase
+      registro["hi"] = infoSeccion.dataValues.horaInicial.toISOString().split("T")[1].split(".")[0]
+      registro["hf"] = infoSeccion.dataValues.horaFinal.toISOString().split("T")[1].split(".")[0]
+      registro["dias"] = infoSeccion.dataValues.dias
+      registro["profesor"] = infoDocente.dataValues.nombres + " " + infoDocente.dataValues.apellidos
+      registro["calificacion"] = contenido.dataValues.calificacion
+      registro["estado"] = contenido.dataValues.estado
+
+      clasesEvaluadas.push(registro)
     };
 
 
@@ -1085,6 +1101,7 @@ export const getInfoEvaluacion = async (req,res) =>{
 };
 
 export const infoCertificado = async (req,res) =>{
+
   try {
     //0.numeroCuenta
     const respuestasReq = [];
