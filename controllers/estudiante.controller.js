@@ -126,15 +126,16 @@ export const actualizarCarreraEstudiante = async (req, res) => {
 export const passwordResetMail = async (req, res) => {
   try {
     const numCuenta = req.body.numeroCuenta;
+
+    
     const usuario = await estudiante.findOne({
       where: { numeroCuenta: numCuenta },
     });
 
-    if (!usuario) {
+    if(isNull(usuario)){
       return res.status(400).json({ message: "El estudiante no existe" });
     }
-    console.log(usuario.dataValues);
-
+    
     let nuevaClave =
       usuario.dataValues.centroRegional.slice(-2) +
       usuario.dataValues.nombres.slice(0, 1) +
@@ -739,7 +740,7 @@ export const getCarreraMatricula = async (req, res) => {
     for(let carrera of carreras){
       const asignaturas = await asignatura.findAll({where:{nombreCarrera:carrera.dataValues.nombreCarrera}});
       for (let asignatura of asignaturas) {
-        if(asignatura.dataValues.idCarrerasDisponibles.split(",").includes(infoEstudiante.dataValues.carrera)){
+        if(asignatura.dataValues.idCarrerasDisponibles.split(",").includes(infoEstudiante.dataValues.carrera) || asignatura.dataValues.idCarrerasDisponibles == "General"){
           carrerasDisponibles.push(carrera.dataValues);
           break;
         }
@@ -765,33 +766,47 @@ export const getAsignaturasMatricula = async (req, res) => {
     const asignaturas = await asignatura.findAll({where:{nombreCarrera:respuestasForm[0]}});
     const historialClases = await historial.findAll({where:{numeroCuenta:respuestasForm[1]}});
     const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[1]}});
+    
+    
+
     let clases = {}
     let clasesHistorial = {}
     forEach(historialClases, async (conetnido) => {
       clasesHistorial[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
     });
+
+    
     forEach(asignaturas, async (conetnido) => {
       conetnido.dataValues.idCarrerasDisponibles.split(",").forEach(element => {
-        if(element == infoEstudiante.dataValues.carrera){
+        if(element == infoEstudiante.dataValues.carrera || element == "general" || element == "General"){
           if(clasesHistorial[`${conetnido.dataValues.idAsignatura}`] == undefined || clasesHistorial[`${conetnido.dataValues.idAsignatura}`].estado != "APR"){
             clases[`${conetnido.dataValues.idAsignatura}`] = conetnido.dataValues;
           };
         }  
       });
     });
+    console.log(clases)
+
     //sacar del historial todos los codigos de asignaturas de las clases del historial
     let requisitosCompletados = []
     for(let clase of historialClases){
-      requisitosCompletados.push(clase.dataValues.idAsignatura)
+      const infoAsignatura = await asignatura.findOne({where:{idAsignatura:clase.dataValues.idAsignatura}});
+      //console.log(infoAsignatura.dataValues)
+      requisitosCompletados.push(infoAsignatura.dataValues.codigoAsignatura)
     }
+    console.log(requisitosCompletados)
+
+    
     //comparar los requisitos de cada clase con los requisitos completados por el estudiante
-    console.log(clases)
     for (let clase in clases) {
-      console.log(clases[clase].requisitos)
+      console.log("zas",clase.dataValues)
       if(clases[clase].requisitos == "General" || clases[clase].requisitos == "general" ){
         continue;
       }
+
+      console.log(clase.dataValues)
       for(let requisito of clases[clase].requisitos.split(",")){
+        console.log(requisitosCompletados, requisito)
         if(requisitosCompletados.includes(requisito) == false && requisito != null){
           delete clases[clase]
         }
@@ -812,19 +827,27 @@ export const getAsignaturasMatricula = async (req, res) => {
 export const contgetSeccionesDisponibles = multer({ storage: storage });
 export const getSeccionesDisponibles = async (req, res) => {
   try {
-    //0.idAsignatura
+    //0.idAsignatura 1.numeroCuenta
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
     });
-
+    console.log(respuestasForm)
+    const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[1]}});
     const contenidoSecciones = await seccion.findAll({where:{idAsignatura:respuestasForm[0]}});
+    
+    //console.log(contenidoSecciones)
     
     if(contenidoSecciones.length == 0){
       return res.status(200).json({ message: "No hay secciones disponibles" });
     }
     let secciones = []
     for(let seccion of contenidoSecciones){
+    
+      //console.log(seccion, infoEstudiante)
+      if(seccion.dataValues.centroRegional !==  infoEstudiante.dataValues.centroRegional){
+        continue;
+      }
       let infoSeccion = seccion.dataValues;
       let infoDocente = await docente.findOne({where:{numeroEmpleadoDocente:seccion.dataValues.numeroEmpleadoDocente}})
       infoSeccion[`nombre`] = infoDocente.dataValues.nombres+" "+infoDocente.dataValues.apellidos
@@ -845,7 +868,7 @@ export const getIndiceAcademico = async (req,res) =>{
     forEach(req.body, async (conetnido) => {
       respuestasReq.push(conetnido);
     });
-
+    console.log(respuestasReq)
     const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasReq[0]}});
     if (infoEstudiante === undefined) {
       return res.status(400).json({ message: "El estudiante no existe" });
@@ -1101,32 +1124,45 @@ export const getInfoEvaluacion = async (req,res) =>{
 };
 
 export const infoCertificado = async (req,res) =>{
-
   try {
     //0.numeroCuenta
     const respuestasReq = [];
     forEach(req.body, async (conetnido) => {
       respuestasReq.push(conetnido);
     });
-
     const infoSolisitud = []
     const infoHistorial = await historial.findAll({where:{numeroCuenta:respuestasReq[0]}});
-
     if(isNull(infoHistorial)){
       return res.status(400).json({ message: "no hay clases en el historial" });
     }
-
-    forEach(infoHistorial, async (registro) => {
+    
+    for(let registro of infoHistorial) {
       let info = {}
       const infoAsignatura = await asignatura.findOne({where:{idAsignatura:registro.dataValues.idAsignatura}});
       info["name"] = infoAsignatura.dataValues.codigoAsignatura
-      info["asignatura"] = upperCase(infoAsignatura.dataValues.nombreClase)
+      info["asignatura"] = infoAsignatura.dataValues.nombreClase.toUpperCase()
       info["cali"] = registro.dataValues.calificacion
       info["uv"] = infoAsignatura.dataValues.uv
-      info["periodo"] = registro.dataValues.periodo.split("-")[1]
+
+      switch (registro.dataValues.periodo.split("-")[1]) {
+        case "I":
+          info["periodo"] = "Primer Periodo"
+          break;
+        case "II":
+          info["periodo"] = "Segundo Periodo"
+          break;
+        case "III":
+          info["periodo"] = "Segundo Periodo"
+          break;
+        default:
+          console.log("error de algun tipo")
+          break;
+      }
+      
       info["anio"] = registro.dataValues.periodo.split("-")[0]
       infoSolisitud.push(info)
-    });
+    }; 
+
 
     return res.status(200).json({infoCertificado: infoSolisitud});
   } catch (error) {

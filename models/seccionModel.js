@@ -49,6 +49,16 @@ export const seccion = sequelize.define(
             type: DataTypes.STRING(200),
             allowNull: false,
         },
+        centroRegional: {
+            type: DataTypes.STRING(10),
+            allowNull: false,
+            validate: {
+                isIn: {
+                    args: [["UNAH-CU", "UNAH-VS", "CURLA"]],
+                    msg: "Centro Regional no válido",
+                },
+            }
+        }
     },{
         timestamps: false,
     }

@@ -19,7 +19,7 @@ import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
 import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
  import { asignatura } from "./models/asignaturaModel.js";
-// import { seccion } from "./models/seccionModel.js";
+ import { seccion } from "./models/seccionModel.js";
  import { matricula } from "./models/matriculaModel.js";
 //import { listaEspera } from "./models/listaEsperaModel.js";
 // import { edificio } from "./models/edificioModel.js";
