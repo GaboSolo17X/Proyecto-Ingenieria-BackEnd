@@ -16,11 +16,11 @@ export const evaluacion = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        idEstudiante:{
+        numeroCuenta:{
             type: DataTypes.STRING(11),
             allowNull: false,
         },
-        idDocente:{
+        numeroEmpleadoDocente:{
             type: DataTypes.STRING(10),
             allowNull: false,
         },

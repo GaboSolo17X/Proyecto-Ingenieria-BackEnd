@@ -40,6 +40,16 @@ export const solicitud = sequelize.define(
             type: DataTypes.STRING(11),
             allowNull: false,
         },
+        estado: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+            validate: {
+                isIn: {
+                    args: [["Pendiente", "Aprobada", "Rechazada"]],
+                    msg: "Estado no válido",
+                },
+            }
+        },
 
     }, {
         timestamps: false,

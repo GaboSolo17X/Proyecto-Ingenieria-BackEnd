@@ -18,6 +18,7 @@ import aspiranteRouter from "./routes/aspirante.route.js";
 import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
 import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
+import jwt from "jsonwebtoken";
  import { asignatura } from "./models/asignaturaModel.js";
 // import { seccion } from "./models/seccionModel.js";
 // import { matricula } from "./models/matriculaModel.js";
@@ -75,6 +76,18 @@ app.use("/seccion", seccionRouter)
 app.use("/perfilEstudiante", perfilEstdudiante);
 // Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
+app.get("/restablecerContraseña", (req, res) => {
+    const token = req.query.token;
+    if (!token) {
+        return res.status(400).json({ message: "Token no encontrado" });
+    }
+    jwt.verify(token,process.env.SECRET_KEY, (err, decodedToken) => {
+        if(err){
+            return res.status(400).json({ message: "Token no válido" });
+        }
+        res.redirect('http://localhost:8080/restablecerContraseña');
+    });
 
+});
 
 app.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
