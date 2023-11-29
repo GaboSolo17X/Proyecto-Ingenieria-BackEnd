@@ -38,12 +38,15 @@ export const historial = sequelize.define(
             type: DataTypes.STRING(10),
             allowNull: false,
             validate: {
-                isIn: {
-                    args: [["I", "II", "III"]],
-                    msg: "Periodo no válido",
-                },
+                esFormatoValido(value) {
+                  // Utiliza una expresion regular para validar el formato deseado
+                  const formatoValido = /^\d{4}-(I|II|III)$/.test(value);
+                  if (!formatoValido) {
+                    throw new Error('El formato del nombre no es valido. Debe ser <anio>-<I|II|III>.');
+                  }
+                }
             }
-        }
+        },
     }, {
         timestamps: false,
     }
