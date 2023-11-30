@@ -83,7 +83,7 @@ export const subirNota = async (req, res) => {
       await enviarCorreo(estudianteInfo, {
         asunto: "Notas del periodo",
         texto:
-          "Lamentamos informate que no has aprobado el examen de admision",
+          "",
         html: `<html>
         <head>
           <style>
