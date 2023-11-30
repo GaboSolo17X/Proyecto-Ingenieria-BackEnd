@@ -43,7 +43,7 @@ router.post("/evalucionDocente",contUpload.array(),guardarEvaluacion);
 router.post("/solicitudCambioCarrera",contCambioCarrera.array(),solicitudCambioCarrera);
 router.post("/solicitudCambioCentro",contCambioCentro.array(),solicitudCambioCentro);
 router.post("/cancelacionExcepcional",uploadPdf,solicitudCancelacionClases);
-router.post("/solicitudReposicion",contReposicion.array(),solicitudReposicion);
+router.post("/solicitudReposicion",contReposicion,solicitudReposicion);
 router.post("/createMatricula",contCreateMatricula.array(),createMatricula);
 router.post("/readMatricula",contReadMatricula.array(),readMatricula);
 router.post("/deleteMatricula",contdeleteMatricula.array(),deleteMatricula)
