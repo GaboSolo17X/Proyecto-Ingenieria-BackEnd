@@ -311,6 +311,7 @@ export const solicitudCambioCarrera = async (req, res) => {
       justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
     nuevaSolicitud.save();
 
@@ -346,6 +347,7 @@ export const solicitudCambioCentro = async (req, res) => {
       justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: infoEstudiante.dataValues.numeroCuenta,
+      estado: "Pendiente"
     });
     nuevaSolicitud.save();
 
@@ -380,14 +382,14 @@ export const solicitudCancelacionClases = async (req, res) => {
       respuestasForm.push(conetnido);
     }); 
     console.log(respuestasForm)
-    console.log(req.file)
+    
     const archivo = req.file.path;
     
     //saco las clases del array y las paso al array clases
     for (let index = 1; index < respuestasForm.length-1; index++) {
       clases = clases + respuestasForm[index] + ",";
     }
-
+    console.log(clases)
     //info del estudiante y matricula
     const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
 
@@ -402,10 +404,11 @@ export const solicitudCancelacionClases = async (req, res) => {
     const nuevaSolicitud = await solicitud.create({
       tipoSolicitud: "Cancelacion Excepcional",
       recurso: archivo,
-      diccionario : clases,
+      diccionario : respuestasForm[1],
       justificacion: "",
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
 
     nuevaSolicitud.save();
@@ -450,6 +453,7 @@ export const solicitudReposicion = async (req, res) => {
       justificacion: respuestasForm[1],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
 
     nuevaSolicitud.save();
