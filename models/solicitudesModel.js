@@ -30,7 +30,7 @@ export const solicitud = sequelize.define(
         },
         justificacion: {
             type: DataTypes.STRING(700),
-            allowNull: false
+            allowNull: true
         },
         idMatricula: {
             type: DataTypes.INTEGER,
