@@ -171,9 +171,9 @@ export const obtenerDocente = async (req,res) => {
     let arraySecciones = []
     for (const docente of docenteFound) {
         const { numeroEmpleadoDocente, nombres, apellidos,correo} = docente
-        const seccionesFound = await seccion.findAll({where:{numeroEmpleadoDocente: numeroEmpleadoDocente}})
+        const horasOcupadasDocente = await seccion.findAll({where:{numeroEmpleadoDocente: numeroEmpleadoDocente}})
         
-        for (const seccionFound of seccionesFound) {
+        for (const seccionFound of horasOcupadasDocente) {
             const {idAsignatura,idSeccion} = seccionFound
             let {horaInicial} = seccionFound
             const fecha = new Date(horaInicial)
@@ -295,8 +295,7 @@ export const obtenerAulas = async (req,res) => {
 };
 
 export const obtenerHorasDisponibles = async (req,res) => {
-    const {nombreEdificio, numeroAula, dias} = req.body   
-
+    const {nombreEdificio, numeroAula, dias, uv} = req.body 
     let horas = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00']
     
     // TRANSFORMAR DIAS A STRING
@@ -304,8 +303,6 @@ export const obtenerHorasDisponibles = async (req,res) => {
     let diasSeleccionadosNombres = diasSemana.filter((dia, index) => dias[index]);
     let diasSeleccionados = diasSeleccionadosNombres.join("");
     let diasSemanaCompleto = diasSemana.join("");
-    console.log(diasSeleccionados)
-    let diasEviar 
 
     // TRANSFORMAR NOMBRE COMPLETO A NOMBRE Y APELLIDO
     let {nombreDocente} = req.body
@@ -315,180 +312,50 @@ export const obtenerHorasDisponibles = async (req,res) => {
     //NUMERO DE EMPLEADO DOCENTE
     const docenteFound = await docente.findOne({where:{nombres}})
     const {numeroEmpleadoDocente} = docenteFound.dataValues
+    console.log(nombreEdificio, numeroAula, uv, diasSeleccionados, numeroEmpleadoDocente)
 
-    //HORA DISPONIBLES DOCENTE
-    const seccionesFound = await seccion.findAll({where:{ numeroEmpleadoDocente: numeroEmpleadoDocente}}) 
-    
-    //HORAS DISPONIBLES AULA
-    const seccionsFoundAula = await seccion.findAll({where:{ edificio: nombreEdificio, aula: numeroAula, dias: diasSeleccionados}})
-    console.log(seccionsFoundAula)
-    const seccionsPrueba = await seccion.findAll({where:{ edificio: nombreEdificio, aula: numeroAula}})
-
-    //HORAS DISPONIBLES AULA Y HORA
-
-    if(seccionesFound.length == 0){
-        if( seccionsFoundAula.length == 0){
-            return res.status(200).json({ message: "Horas disponibles", horas, dias:diasSemanaCompleto });
-
-
-        }
-        else{
-            for(const seccion of seccionsFoundAula){
-                const {horaInicial, horaFinal, dias} = seccion.dataValues
-                //HORA FORMATEADA HORA INICIAL 
-                diasEviar = dias
-                const fecha = new Date(horaInicial)
-                const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-                const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-
-                //HORA FORMATEADA HORA FINAL
-                const fechaF = new Date(horaFinal)
-                const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-                const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-
-                const indiceInicial = horas.indexOf(horaFormateadaUTC)
-                const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-                if (indiceInicial !== -1 && indiceFinal !== -1) {
-                    horas.splice(indiceInicial, indiceFinal - indiceInicial );
-                }
-            }
-
-            for( const seccion of seccionsPrueba){
-                const {horaInicial, horaFinal, dias} = seccion.dataValues
-                //HORA FORMATEADA HORA INICIAL 
-                diasEviar = dias
-                const fecha = new Date(horaInicial)
-                const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-                const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-                 //HORA FORMATEADA HORA FINAL
-                const fechaF = new Date(horaFinal)
-                const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-                const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-                const indiceInicial = horas.indexOf(horaFormateadaUTC)
-                const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-                if (indiceInicial !== -1 && indiceFinal !== -1) {
-                    horas.splice(indiceInicial, indiceFinal - indiceInicial );
-                }
-            }
-
-            return res.status(200).json({ message: "Horas disponibles", horas, dias: diasEviar});
-        }
-    }else{
-        for(const seccion of seccionesFound){
-            const {horaInicial, horaFinal} = seccion.dataValues
-                
-            //HORA FORMATEADA HORA INICIAL 
-            const fecha = new Date(horaInicial)
-            const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-            const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-            //HORA FORMATEADA HORA FINAL
-            const fechaF = new Date(horaFinal)
-            const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-            const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-            const indiceInicial = horas.indexOf(horaFormateadaUTC)
-            const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-            if (indiceInicial !== -1 && indiceFinal !== -1) {
-                horas.splice(indiceInicial, indiceFinal - indiceInicial );
-            }
-            console.log(horas)
-        }
-
-        
-        for( const seccion of seccionsPrueba){
-            const {horaInicial, horaFinal, dias} = seccion.dataValues
-            //HORA FORMATEADA HORA INICIAL 
-            diasEviar = dias
-            const fecha = new Date(horaInicial)
-            const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-            const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-             //HORA FORMATEADA HORA FINAL
-            const fechaF = new Date(horaFinal)
-            const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-            const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-            const indiceInicial = horas.indexOf(horaFormateadaUTC)
-            const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-            if (indiceInicial !== -1 && indiceFinal !== -1) {
-                horas.splice(indiceInicial, indiceFinal - indiceInicial );
-            }
-            console.log(horas)
-        }
-
-        if( seccionsFoundAula.length == 0){
-            return res.status(200).json({ message: "Horas disponibles", horas});
-        }
-        else{
-            for(const seccion of seccionsFoundAula){
-            const {horaInicial, horaFinal, dias} = seccion.dataValues
-            diasEviar = dias
-            //HORA FORMATEADA HORA INICIAL 
-            const fecha = new Date(horaInicial)
-            const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-            const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-            //HORA FORMATEADA HORA FINAL
-            const fechaF = new Date(horaFinal)
-            const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-            const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-            const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-            const indiceInicial = horas.indexOf(horaFormateadaUTC)
-            const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-            if (indiceInicial !== -1 && indiceFinal !== -1) {
-                horas.splice(indiceInicial, indiceFinal - indiceInicial );
-            }
-            }
-            console.log(horas)
-
-            
-            for( const seccion of seccionsPrueba){
-                const {horaInicial, horaFinal, dias} = seccion.dataValues
-                //HORA FORMATEADA HORA INICIAL 
-                diasEviar = dias
-                const fecha = new Date(horaInicial)
-                const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
-                const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
-
-                 //HORA FORMATEADA HORA FINAL
-                const fechaF = new Date(horaFinal)
-                const horasUTCF = fechaF.getUTCHours().toString().padStart(2, '0');
-                const minutosUTCF = fechaF.getUTCMinutes().toString().padStart(2, '0');
-                const horaFormateadaUTCF = `${horasUTCF}:${minutosUTCF}`;
-
-                const indiceInicial = horas.indexOf(horaFormateadaUTC)
-                const indiceFinal = horas.indexOf(horaFormateadaUTCF)
-
-                if (indiceInicial !== -1 && indiceFinal !== -1) {
-                    horas.splice(indiceInicial, indiceFinal - indiceInicial );
-                }
-            }
-            console.log(horas)
-
-            return res.status(200).json({ message: "Horas disponibles", horas, dias: diasEviar});
-        }
+    //Obtener las secciones que ya se le asignaron al docente y eliminar respectivas horas de la lista
+    const horasOcupadasDocente = await seccion.findAll({where:{numeroEmpleadoDocente}})
+    if(horasOcupadasDocente.length == 0){
     }
+    for (const seccion of horasOcupadasDocente) {
+        const {horaInicial, horaFinal, dias} = seccion
+        const fecha = new Date(horaInicial)
+        const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
+        const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
+        const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
+
+        horas = horas.filter((hora) => hora != horaFormateadaUTC)
+
+    }
+
+    if (typeof diasSeleccionados === 'string') {
+        diasSeleccionados = diasSeleccionados.match(/.{1,2}/g); // Divide la cadena en trozos de dos caracteres
+    }
+    
+
+    const seccionesAula = await seccion.findAll({where:{edificio: nombreEdificio, aula: numeroAula}})
+    if(seccionesAula.length == 0){
+        return res.status(200).json({ message: "Horas disponibles", horas});
+    }else{
+        for (const seccion of seccionesAula) {
+            const {horaInicial, dias} = seccion
+            const diasSeccion = dias.match(/.{1,2}/g);
+            // Comprobar si hay una superposición de días 
+            const superposicionDias = diasSeleccionados.some(dia => diasSeccion.includes(dia));
+        
+            if (superposicionDias) {
+                const fecha = new Date(horaInicial)
+                const horasUTC = fecha.getUTCHours().toString().padStart(2, '0');
+                const minutosUTC = fecha.getUTCMinutes().toString().padStart(2, '0');
+                const horaFormateadaUTC = `${horasUTC}:${minutosUTC}`;
+        
+                horas = horas.filter((hora) => hora != horaFormateadaUTC)
+            }
+        }
+        return res.status(200).json({ message: "Horas disponibles", horas});
+    }
+    
 
 
 };
@@ -588,12 +455,12 @@ export const obtenerSecciones = async (req,res) => {
     const {numeroEmpleadoDocente} = req.body
     const jefeCentro = await docente.findOne({where:{numeroEmpleadoDocente}})
     const { centroRegional } = jefeCentro
-    const seccionesFound = await seccion.findAll({where:{centroRegional}})
+    const horasOcupadasDocente = await seccion.findAll({where:{centroRegional}})
     let arraySecciones = []
-    if(seccionesFound.length == 0){
+    if(horasOcupadasDocente.length == 0){
         return res.status(400).json({ message: "No hay secciones" });
     };
-    for (const seccion of seccionesFound) {
+    for (const seccion of horasOcupadasDocente) {
         const { idAsignatura, numeroEmpleadoDocente} = seccion
         const docenteFound = await docente.findOne({where:{numeroEmpleadoDocente}})
         const asignaturaFound = await asignatura.findOne({where:{idAsignatura}})

@@ -34,14 +34,11 @@ import { aula } from "./models/aulaModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
  //import { estado_Proceso } from "./models/estadoProceso.js";
  //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
-<<<<<<< HEAD
 //import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
 import { evaluacion } from "./models/evaluacionModel.js";
 import { JustificacionCancelacionSeccion } from "./models/justificacionCancelacionSeccionModel.js";
-=======
  import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
- import {solicitud} from "./models/solicitudesModel.js"
->>>>>>> 55cedbce9d4e86ad9260d5c8553e3b1a01aa0950
+import {solicitud} from "./models/solicitudesModel.js"
 
  //
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
