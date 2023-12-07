@@ -29,7 +29,7 @@ export const historial = sequelize.define(
             allowNull: false,
             validate: {
                 isIn: {
-                    args: [["APR", "RPD", "NSP"]],
+                    args: [["APR", "RPD", "NSP", "ABN", "NA"]],
                     msg: "Estado no válido",
                 },
             }

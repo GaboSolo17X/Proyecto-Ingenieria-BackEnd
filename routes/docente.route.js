@@ -7,7 +7,8 @@ import {
     getDocentes,
     descargarListadoEstudiantes,
     getSeccionesDocente,
-    getEstudiantesSeccion
+    getEstudiantesSeccion,
+    reinicioClaveDocente
     
 } from '../controllers/docente.controller.js';
 
@@ -19,7 +20,8 @@ router.get("/getdocentes", getDocentes);
 router.get("/docentes/getbynumer0", getDocenteByNumeroEmpleado);
 router.post("/listadoEstudiante", descargarListadoEstudiantes);
 router.post("/getSeccionesDocente", getSeccionesDocente)
-router.post("/getEstudiantesSeccion", getEstudiantesSeccion)
+router.post("/getEstudiantesSeccion", getEstudiantesSeccion)+
+router.post('/reinicioClave', reinicioClaveDocente)
 
 
 export default router;
