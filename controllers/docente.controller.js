@@ -189,7 +189,9 @@ export const descargarListadoEstudiantes = async (req, res) => {
 
 export const getEstudiantesSeccion = async (req, res) => {
     try {
+        console.log("hola")
         const { idSeccion } = req.body;
+        console.log(idSeccion)
         const estudiantesSeccion = await matricula.findAll({ where: { idSeccion } });
         const estudiantes = [];
 

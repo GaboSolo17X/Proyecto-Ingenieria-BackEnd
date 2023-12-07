@@ -311,6 +311,7 @@ export const solicitudCambioCarrera = async (req, res) => {
       justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
     nuevaSolicitud.save();
 
@@ -346,6 +347,7 @@ export const solicitudCambioCentro = async (req, res) => {
       justificacion: respuestasForm[2],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: infoEstudiante.dataValues.numeroCuenta,
+      estado: "Pendiente"
     });
     nuevaSolicitud.save();
 
@@ -373,7 +375,6 @@ export const solicitudCancelacionClases = async (req, res) => {
   try {
     //primer elemento:cuenta
     //elementos enmedio: clases
-    //ultimo elemento: justificacion
     const respuestasForm = [];
     let clases = "";
     //paso el conetnido del formulario a un array
@@ -381,14 +382,14 @@ export const solicitudCancelacionClases = async (req, res) => {
       respuestasForm.push(conetnido);
     }); 
     console.log(respuestasForm)
-    console.log(req.file)
+    
     const archivo = req.file.path;
     
     //saco las clases del array y las paso al array clases
     for (let index = 1; index < respuestasForm.length-1; index++) {
       clases = clases + respuestasForm[index] + ",";
     }
-
+    console.log(clases)
     //info del estudiante y matricula
     const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:respuestasForm[0]}});
 
@@ -403,10 +404,11 @@ export const solicitudCancelacionClases = async (req, res) => {
     const nuevaSolicitud = await solicitud.create({
       tipoSolicitud: "Cancelacion Excepcional",
       recurso: archivo,
-      diccionario : clases,
-      justificacion: respuestasForm[respuestasForm.length-1],
+      diccionario : respuestasForm[1],
+      justificacion: "",
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
 
     nuevaSolicitud.save();
@@ -419,12 +421,20 @@ export const solicitudCancelacionClases = async (req, res) => {
 };
 
 //multer para recibir formulario de reposicion
-export const contReposicion = multer({ storage: storage });
+const contStorageReposicion = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, './public/solicitudes')
+  },
+  filename: function (req, file, cb) {
+      cb(null, `${Date.now()}-reposicion-${file.originalname}`)
+  }
+})
 
+export const contReposicion = multer({ storage: contStorageReposicion }).single('pagoReposicion')
 //solicitud de reposicion de clases sin token usar numero de cuenta
 export const solicitudReposicion = async (req, res) => {
   try {
-    //0.cuenta ,1.justificacion
+    //0.cuenta ,1.justificacion 2.imagne del recibo
     const respuestasForm = [];
     forEach(req.body, async (conetnido) => {
       respuestasForm.push(conetnido);
@@ -432,13 +442,18 @@ export const solicitudReposicion = async (req, res) => {
     const infoEstudiante = await estudiante.findOne({where:{numeroCuenta:respuestasForm[0]}});
     const estudianteMatricula = await matricula.findOne({where:{numeroCuenta:infoEstudiante.dataValues.numeroCuenta}});
 
+
+    const archivo = req.file.path;
+
+
     const nuevaSolicitud = await solicitud.create({
       tipoSolicitud: "Pago Reposicion",
-      recurso: null,
+      recurso: archivo,
       diccionario : null,
       justificacion: respuestasForm[1],
       idMatricula: estudianteMatricula.dataValues.idMatricula,
       numeroCuenta: respuestasForm[0],
+      estado: "Pendiente"
     });
 
     nuevaSolicitud.save();
