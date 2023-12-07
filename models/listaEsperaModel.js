@@ -15,7 +15,10 @@ export const listaEspera = sequelize.define(
         },
         numeroCuenta: {
             type: DataTypes.STRING(11),
-        }
+        },
+        estado: {
+            type: DataTypes.BOOLEAN,
+        },
     }, {
         timestamps: false,
     }

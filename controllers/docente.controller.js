@@ -10,6 +10,7 @@ import { estudiante } from "../models/estudianteModel.js";
 import { asignatura } from "../models/asignaturaModel.js";
 import exceljs from "exceljs";
 import path from "path";
+import bcrypt from "bcrypt";
 
 const storageFotoCertificado = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -219,5 +220,17 @@ export const enviarListadoEstudiantes = async (direccion, req, res) => {
         res.status(200).sendFile(path.resolve(direccion));
     } catch (error) {
         console.log(error);
+    }
+};
+
+export const reinicioClaveDocente = async (req, res) => {
+    try{
+        const { numeroEmpleadoDocente, claveDocenteNueva } = req.body;
+        const hashedPassword = await bcrypt.hash(claveDocenteNueva, 10);
+        await docente.update({ claveDocente: hashedPassword }, { where: { numeroEmpleadoDocente } });
+        return res.status(200).json({ message: "Clave reiniciada" });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
     }
 };

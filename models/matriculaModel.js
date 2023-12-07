@@ -34,7 +34,7 @@ export const matricula = sequelize.define(
             allowNull: false,
             validate: {
                 isIn: {
-                    args: [["APR", "RPD", "NSP","ABN"]],
+                    args: [["APR", "RPD", "NSP","ABN", "NA"]],
                     msg: "Estado no válido",
                 },
             }

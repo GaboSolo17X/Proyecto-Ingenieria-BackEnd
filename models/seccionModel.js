@@ -44,10 +44,10 @@ export const seccion = sequelize.define(
         horaFinal:{
             type: DataTypes.TIME,
             allowNull: false,
-        },  
+        },
         linkVideo:{
             type: DataTypes.STRING(200),
-            allowNull: false,
+            allowNull: true, //AQUI SE HIZO UN CAMBIO POR SI SE NOS OLVIDA SON LAS 4 AM 
         },
         centroRegional: {
             type: DataTypes.STRING(10),

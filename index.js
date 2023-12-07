@@ -19,19 +19,24 @@ import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
 import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
 import jwt from "jsonwebtoken";
- import { asignatura } from "./models/asignaturaModel.js";
- import { seccion } from "./models/seccionModel.js";
- import { matricula } from "./models/matriculaModel.js";
+import url from 'url';
+import querystring from 'querystring';
+
+//import { asignatura } from "./models/asignaturaModel.js";
+//import { seccion } from "./models/seccionModel.js";
+//import { matricula } from "./models/matriculaModel.js";
 //import { listaEspera } from "./models/listaEsperaModel.js";
-// import { edificio } from "./models/edificioModel.js";
-// import { aula } from "./models/aulaModel.js";
+import { edificio } from "./models/edificioModel.js";
+import { aula } from "./models/aulaModel.js";
 // import { historial } from "./models/historialModel.js";
- import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
- import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
+//import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
+//import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
  //import { estado_Proceso } from "./models/estadoProceso.js";
  //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
- import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+//import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+import { evaluacion } from "./models/evaluacionModel.js";
+import { JustificacionCancelacionSeccion } from "./models/justificacionCancelacionSeccionModel.js";
 
  //
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
@@ -45,7 +50,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(
     cors({
         origin: function (origin, callback) {
-            //console.log("😲😲😲 =>", origin);
+            console.log("😲😲😲 =>", origin);
             if (!origin || whiteList.includes(origin)) {
                 return callback(null, origin);
             }
@@ -62,7 +67,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-
 app.use("/aspirante", aspiranteRouter);
 app.use("/estudiante", estudianteRouter);
 app.use("/docente", docenteRouter);
@@ -74,20 +78,30 @@ app.use("/token", tokenRouter);
 app.use("/matricula", matriculaRouter);
 app.use("/seccion", seccionRouter)
 app.use("/perfilEstudiante", perfilEstdudiante);
-// Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
-app.get("/restablecerContraseña", (req, res) => {
-    const token = req.query.token;
-    if (!token) {
-        return res.status(400).json({ message: "Token no encontrado" });
-    }
-    jwt.verify(token,process.env.SECRET_KEY, (err, decodedToken) => {
-        if(err){
-            return res.status(400).json({ message: "Token no válido" });
-        }
-        res.redirect('http://localhost:8080/restablecerContraseña');
-    });
 
-});
+app.get("/restablecerContrasenia", (req, res) => {
+    const parsedUrl = url.parse(req.url);
+    const parsedQs = querystring.parse(parsedUrl.query);
+    const token = parsedQs.token;
+
+    //Verificar token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if(err) {
+            res.send("El token no es válido o ya expiro");
+        }
+        else{
+            const numeroEmpleadoDocente = decoded.numeroEmpleadoDocente;
+            res.redirect('http://localhost:8082/#/reiniciarClave/' + numeroEmpleadoDocente);
+        }
+    });
+ 
+  });
+
+
+app.get('/descargar/:rutaArchivo', (req, res) => {
+    const rutaArchivo = path.join(__dirname, req.params.rutaArchivo);
+    res.sendFile(rutaArchivo);
+})
 
 app.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
