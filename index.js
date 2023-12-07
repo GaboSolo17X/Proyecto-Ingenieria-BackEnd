@@ -34,7 +34,7 @@ import { aula } from "./models/aulaModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
  //import { estado_Proceso } from "./models/estadoProceso.js";
  //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
-//import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
 import { evaluacion } from "./models/evaluacionModel.js";
 import { JustificacionCancelacionSeccion } from "./models/justificacionCancelacionSeccionModel.js";
  import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
