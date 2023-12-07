@@ -9,7 +9,7 @@ export const fotoEstudiante = sequelize.define(
             autoIncrement: true,
         },
         numeroCuenta: {
-            type: DataTypes.STRING(10),
+            type: DataTypes.STRING(11),
             allowNull: false,
 
         }

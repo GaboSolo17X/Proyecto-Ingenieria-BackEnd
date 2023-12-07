@@ -18,21 +18,26 @@ import aspiranteRouter from "./routes/aspirante.route.js";
 import matriculaRouter from "./routes/matriculas.route.js";
 import seccionRouter from "./routes/seccion.router.js";
 import perfilEstdudiante from "./routes/perfilEstudiante.route.js";
+import chats from "./routes/chat.route.js"
 import jwt from "jsonwebtoken";
- import { asignatura } from "./models/asignaturaModel.js";
- import { seccion } from "./models/seccionModel.js";
- import { matricula } from "./models/matriculaModel.js";
+import { asignatura } from "./models/asignaturaModel.js";
+import { seccion } from "./models/seccionModel.js";
+import { matricula } from "./models/matriculaModel.js";
 //import { listaEspera } from "./models/listaEsperaModel.js";
-// import { edificio } from "./models/edificioModel.js";
-// import { aula } from "./models/aulaModel.js";
-// import { historial } from "./models/historialModel.js";
- import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
- import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
-// import { solicitud } from "./models/solicitudesModel.js";
- //import { estado_Proceso } from "./models/estadoProceso.js";
- //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
- import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
- import {solicitud} from "./models/solicitudesModel.js"
+//import { edificio } from "./models/edificioModel.js";
+//import { aula } from "./models/aulaModel.js";
+//import { historial } from "./models/historialModel.js";
+import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
+import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
+import {evaluacion} from "./models/evaluacionModel.js"
+//import { solicitud } from "./models/solicitudesModel.js";
+//import { estado_Proceso } from "./models/estadoProceso.js";
+//import { indiceAcademico } from "./models/indiceAcademicoModel.js";
+import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+import {solicitud} from "./models/solicitudesModel.js"
+import { chat } from "./models/chatModel.js";
+import { grupo } from "./models/grupoModel.js";
+import { solicitudChat } from "./models/solicitudChatModel.js"; 
 
  //
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
@@ -77,6 +82,8 @@ app.use("/seccion", seccionRouter)
 app.use("/perfilEstudiante", perfilEstdudiante);
 // Para recibir archivos, procesarlo y enviarl los correos
 app.use("/upload", subidas);
+app.use("/chat",chats)
+
 app.get("/restablecerContraseña", (req, res) => {
     const token = req.query.token;
     if (!token) {

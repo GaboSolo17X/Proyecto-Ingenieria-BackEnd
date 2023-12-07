@@ -46,6 +46,7 @@ export const loginEstudiante = async (req, res) => {
         idFotoEstudiante: fotoPerfil.dataValues.idFotoEstudiante,
         descripcion: "Sin descripcion",
       });
+      
       estudiantePerfil.save();
     }
     
@@ -274,6 +275,7 @@ export const guardarEvaluacion = async (req, res) => {
       respuestaTexto1: respuestasForm[4],
       respuestaTexto2: respuestasForm[5],
       estado: true,
+
     });
 
     //posible modificacion por creacion de evaluaciones con la entrega de notas
@@ -680,6 +682,9 @@ export const notasDespuesEvaluacion = async (req, res) => {
     });
 
     console.log(respuestasForm)
+    const datoevaluarionces = await evaluacion.findAll()
+    console.log(datoevaluarionces)
+    
     const infoEvaluacion = await evaluacion.findAll({where:{idEstudiante:respuestasForm[0]}});
     const infoClasesMatriculadas = await matricula.findAll({where:{numeroCuenta:respuestasForm[0]}});
     

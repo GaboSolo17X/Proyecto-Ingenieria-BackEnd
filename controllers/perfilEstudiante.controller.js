@@ -136,7 +136,9 @@ export const eliminarFoto = async (req, res) => {
         forEach(req.body,async (elemento) => {
             formContenido.push(elemento)
         });
+        
 
+        console.log(formContenido)
         const imagenEstudiante = await fotoEstudiante.findOne({ where: { idfotoEstudiante: formContenido[1]}});
         if (imagenEstudiante == null) {
             return res.status(400).json({ message: "Foto no existe" });
@@ -144,8 +146,23 @@ export const eliminarFoto = async (req, res) => {
         if (imagenEstudiante.dataValues.numeroCuenta !== formContenido[0]) {
             return res.status(400).json({ message: "Foto no pertenece a estudiante" });
         };
+
+        //verificar si la foto enviada es la misma
+        const fotoPerfilUsada = await perfilEstudiante.findOne({where: {numeroCuenta:formContenido[0]}})
+
+        if(fotoPerfilUsada.dataValues.idfotoEstudiante === imagenEstudiante.dataValues.idfotoEstudiante){
+            let estudianteLogin = await estudiante.findOne({where: { numeroCuenta: formContenido[0] }});
+            let infoEstudiante = estudianteLogin.dataValues;
+            infoEstudiante[`fotoPerfil`] = "./public/images/estudiantes/vacopio.jpg"
+            imagenEstudiante.destroy();
+            return res.status(200).json({ message: "Foto eliminada y actualizada",infoEstudiante});
+        }
+
+
+     
         imagenEstudiante.destroy();
         
+
         return res.status(200).json({ message: "Foto eliminada" });
     } catch (error) {
         console.log(error);
