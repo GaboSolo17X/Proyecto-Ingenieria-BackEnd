@@ -302,9 +302,13 @@ export const createGrupo = async (req, res) => {
         }
         let integrantes = ""
         for(let numeroEstudiante of respuesta[0]._value){
-            integrantes = integrantes+","+numeroEstudiante
-        }
-
+            if(integrantes.length == 0){
+                integrantes = numeroEstudiante
+            }else{
+                integrantes = integrantes.concat(","+numeroEstudiante)
+            }
+        }  
+        console.log(integrantes)
         const grupo1 = await grupo.create(
             {
                 participantes: integrantes,
@@ -332,9 +336,7 @@ export const getGrupos = async (req, res) => {
             respuesta.push(conetnido);
         });
         console.log(respuesta);
-
         const grupos = await grupo.findAll();
-
         //buscar los grupos del usuario
         const gruposUsuario = [];
         grupos.forEach((grupo) => {
@@ -350,11 +352,14 @@ export const getGrupos = async (req, res) => {
         //obtener nombre, numeroCuenta y foto de los usuarios de los grupos
 
         gruposUsuario.forEach(async (grupo) => {
-            const participantes = grupo.participantes.split(",");
+
+            console.log(grupo)
+
+            const participantes = grupo["participantes"].split(",");
             const participantes2 = [];
             participantes.forEach(async (participante) => {
                 const estudiante1 = await estudiante.findOne({where: {numeroCuenta: participante}});
-                
+
                 /* const perfilEstudiante1 = await perfilEstudiante.findOne({where: {numeroCuenta: participante}});
                 const fotoEstudiante1 = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudiante1.dataValues.idfotoEstudiante}}); */
                 
@@ -386,14 +391,18 @@ export const salirGrupo = async (req, res) => {
 
         const grupo1 = await grupo.findOne({where: {idGrupo: respuesta[0]}});
 
-        const participantes = grupo1.participantes.split(",");
-        const participantes2 = [];
+        const participantes = grupo1.dataValues.participantes.split(",");
+        let participantes2 = [];
         participantes.forEach((participante) => {
             if(participante != respuesta[1]){
                 participantes2.push(participante);
             }
         });
 
+        if(participantes2.length <= 0){
+            grupo1.destroy()
+            return res.status(200).json({ message: "Salio del grupo y se eilimino porque no quedan integrantes" });
+        }
         grupo1.participantes = participantes2.toString();
         grupo1.save();
 
@@ -403,7 +412,6 @@ export const salirGrupo = async (req, res) => {
         return res.status(500).json({ message: "Error del servidor" });
     }
 }
-
 
 export const getEstudiantesCentro = async (req, res) =>{
     try{
@@ -460,6 +468,122 @@ export const getEstudiantesCentro = async (req, res) =>{
     }catch(error){
         console.log(error);
         return res.status(500).json({ message: "Error del servidor" });
+    }
+}
+
+//añadir al route
+
+export const getMiembrosGrupo = async (req,res) =>{
+    try {
+        //0.idGrupo
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta);
+
+        const grupoContenido = await grupo.findOne({where:{idGrupo:respuesta[0]}})
+
+        if(isNull(grupoContenido)){
+            return res.status(200).json({ message: "No existe este grupo" });    
+        }
+        const integrantesGrupo = grupoContenido.dataValues.participantes.split(",")
+        console.log(integrantesGrupo)
+
+        const perfilesIntegrantes = []
+        for(let integrante of integrantesGrupo){
+            console.log(integrante)
+            const estudiantesInfo = await estudiante.findOne({where: {numeroCuenta: integrante}});
+            const perfilEstudianteInfo = await perfilEstudiante.findOne({where: {numeroCuenta: integrante}});
+            console.log(perfilEstudianteInfo)
+            const fotoEstudianteInfo = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudianteInfo.dataValues.idfotoEstudiante}});
+            if(isNull(estudiantesInfo) || isNull(perfilEstudianteInfo) || isNull(fotoEstudianteInfo)){
+
+                console.log(isNull(estudiantesInfo),isNull(perfilEstudianteInfo),isNull(fotoEstudianteInfo))
+                return res.status(200).json({ message: "Hay un problema con los miembros del grupo" });    
+
+            }
+
+            perfilesIntegrantes.push(
+                {
+                    "nombre": estudiantesInfo.dataValues.nombres.split(" ")[0]+" "+estudiantesInfo.dataValues.apellidos.split(" ")[0],
+                    "foto": fotoEstudianteInfo.dataValues.fotoEstudiante
+                }
+            )
+
+            }
+        console.log(perfilesIntegrantes)
+        return res.status(200).json({ perfilesGrupo:perfilesIntegrantes });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error del servidor" });
+    }
+}
+
+export const eliminarContacto = async (req,res) =>{
+    try {
+        //0.numeroCuenta_propio 1.numeroCuenta_otro
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta);
+
+        //Buscar el contacto(chat)
+
+        const contactoChat0 = await chat.findOne({where:{idUsuario: respuesta[0], idUsuario2: respuesta[1]}})
+        const contactoChat1 = await chat.findOne({where:{idUsuario: respuesta[1], idUsuario2: respuesta[0]}})
+
+        if(isNull(contactoChat0) && isNull(contactoChat1)){
+            return res.status(400).json({ message: "No existe el Chat" });    
+        }
+
+        //se encontro en contactoChat0
+        if(isNull(contactoChat0) == false && isNull(contactoChat1) == true){
+            contactoChat0.destroy()
+            const solicitud0 = await solicitudChat.findOne({where:{idUsuario: respuesta[0], idUsuario2: respuesta[1]}})
+            const solicitud1 = await solicitudChat.findOne({where:{idUsuario: respuesta[1], idUsuario2: respuesta[0]}})
+
+            if(isNull(solicitud0) && isNull(solicitud1)){
+                return res.status(400).json({ message: "No existe la Solicitud lo cual es raro" });    
+            }
+            
+            if(isNull(solicitud0) == false && isNull(solicitud1) == true){
+                solicitud0.destroy()
+            }
+            if(isNull(solicitud0) == true && isNull(solicitud1) == false){
+                solicitud1.destroy()
+            }
+
+            return res.status(200).json({ message: "Se elimino el contacto" });
+        }
+
+        //se encontro en contactoChat1
+        if(isNull(contactoChat0) == true && isNull(contactoChat1) == false){
+            contactoChat1.destroy()
+            
+            
+            const solicitud0 = await solicitudChat.findOne({where:{idUsuario: respuesta[0], idUsuario2: respuesta[1]}})
+            const solicitud1 = await solicitudChat.findOne({where:{idUsuario: respuesta[1], idUsuario2: respuesta[0]}})
+            
+            if(isNull(solicitud0) && isNull(solicitud1)){
+                return res.status(400).json({ message: "No existe la Solicitud lo cual es raro" });    
+            }
+            
+            if(isNull(solicitud0) == false && isNull(solicitud1) == true){
+                solicitud0.destroy()
+            }
+            if(isNull(solicitud0) == true && isNull(solicitud1) == false){
+                solicitud1.destroy()
+            }
+            
+            return res.status(200).json({ message: "Se elimino el contacto" });
+        }
+
+        return res.status(200).json({ message: "algo extraño paso porque no se hizo nada" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
     }
 }
 
