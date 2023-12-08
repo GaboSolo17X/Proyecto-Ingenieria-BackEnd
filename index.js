@@ -2,6 +2,8 @@ import "dotenv/config";
 import "./config/confSequelize.js"
 import "./database/connectDB.js"
 import express from "express";
+import {Server} from "socket.io"
+import {createServer} from "node:http"
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from 'path';
@@ -35,7 +37,7 @@ import { aula } from "./models/aulaModel.js";
  //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
 import { evaluacion } from "./models/evaluacionModel.js";
 import { JustificacionCancelacionSeccion } from "./models/justificacionCancelacionSeccionModel.js";
- import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
 import {solicitud} from "./models/solicitudesModel.js"
 import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
 import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
@@ -46,6 +48,44 @@ import { solicitudChat } from "./models/solicitudChatModel.js";
  //
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
 const app = express();
+const server = createServer(app)
+const io = new Server(server, {
+    cors: {
+      origin: whiteList, // Puedes usar whiteList en lugar de una URL específica
+      methods: ["GET", "POST"] // Puedes especificar los métodos permitidos si es necesario
+    }
+});
+
+io.on( 'connect', (socket) => {
+    console.log(`Se a conectado un usuario con id  ${socket.id}`)
+
+    socket.on('actualizacion', (numeroCuenta)=>{
+        socket.id = numeroCuenta
+        console.log(`se actualizo el socket id al ${socket.id}`)
+    })
+
+    socket.on('mensaje',(msg)=>{
+        console.log("mensaje recibido: "+msg)
+        io.emit("mensaje",msg)
+    })
+
+    socket.on('joinSala', (sala) => {
+        socket.join(sala);
+        console.log(`El usuario ${socket.id} se ha unido a la sala ${sala}`);
+      });
+    
+    socket.on('privado',(data)=>{
+        const { destinatario, mensaje } = data;
+        console.log(destinatario, mensaje)
+        io.to(destinatario).emit("privado",mensaje)
+    })
+
+    socket.on('disconnect', ()=>{console.log('se desconecto el usuario')})
+
+})
+
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -55,7 +95,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(
     cors({
         origin: function (origin, callback) {
-            console.log("😲😲😲 =>", origin);
+            //console.log("😲😲😲 =>", origin);
             if (!origin || whiteList.includes(origin)) {
                 return callback(null, origin);
             }
@@ -111,4 +151,4 @@ app.get('/descargar/:rutaArchivo', (req, res) => {
     res.sendFile(rutaArchivo);
 })
 
-app.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
+server.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));

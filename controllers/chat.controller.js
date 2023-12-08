@@ -110,33 +110,32 @@ export const getChats = async (req, res) => {
             }
         });
         
-
-        chats.forEach(async (usuario) => {
+        for(let usuario of chats){
             
             if(usuario.idUsuario !== respuesta[0]){
                 const estudiante1 = await estudiante.findOne({where: {numeroCuenta: usuario.idUsuario}});
                 const perfilEstudiante1 = await perfilEstudiante.findOne({where: {numeroCuenta: usuario.idUsuario}});
-                const fotoEstudiante1 = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudiante1.idfotoEstudiante}});
+                const fotoEstudiante1 = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudiante1.dataValues.idfotoEstudiante}});
                 
                 if(!isNull(estudiante1) && !isNull(perfilEstudiante1) && !isNull(fotoEstudiante1)){
-                    usuario.nombre = estudiante1.nombre;
-                    usuario.numeroCuenta = estudiante1.numeroCuenta;
-                    usuario.foto = fotoEstudiante1.foto;
+                    usuario.nombre = estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0];
+                    usuario.numeroCuenta = estudiante1.dataValues.numeroCuenta;
+                    usuario.foto = fotoEstudiante1.dataValues.fotoEstudiante;
                 }
             }
 
             if(usuario.idUsuario2 !== respuesta[0]){
                 const estudiante2 = await estudiante.findOne({where: {numeroCuenta: usuario.idUsuario2}});
                 const perfilEstudiante2 = await perfilEstudiante.findOne({where: {numeroCuenta: usuario.idUsuario2}});
-                const fotoEstudiante2 = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudiante2.idfotoEstudiante}});
+                const fotoEstudiante2 = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudiante2.dataValues.idfotoEstudiante}});
 
                 if(!isNull(estudiante2) && !isNull(perfilEstudiante2) && !isNull(fotoEstudiante2)){
-                    usuario.nombre = estudiante2.nombre;
-                    usuario.numeroCuenta = estudiante2.numeroCuenta;
-                    usuario.foto = fotoEstudiante2.foto;
+                    usuario.nombre = estudiante2.dataValues.nombres.split(" ")[0]+" "+estudiante2.dataValues.apellidos.split(" ")[0];
+                    usuario.numeroCuenta = estudiante2.dataValues.numeroCuenta;
+                    usuario.foto = fotoEstudiante2.dataValues.fotoEstudiante;
                 }
             }
-        });
+        };
 
         return res.status(200).json({ chats: chats });
     } catch (error) {
@@ -353,7 +352,7 @@ export const getGrupos = async (req, res) => {
 
         gruposUsuario.forEach(async (grupo) => {
 
-            console.log(grupo)
+            //console.log(grupo)
 
             const participantes = grupo["participantes"].split(",");
             const participantes2 = [];
@@ -463,7 +462,7 @@ export const getEstudiantesCentro = async (req, res) =>{
                 estudiantesInfo.push(informacion)
             }
         };
-        console.log(estudiantesInfo)
+        //console.log(estudiantesInfo)
         return res.status(200).json({ estudiantesInfo });
     }catch(error){
         console.log(error);
@@ -488,7 +487,7 @@ export const getMiembrosGrupo = async (req,res) =>{
             return res.status(200).json({ message: "No existe este grupo" });    
         }
         const integrantesGrupo = grupoContenido.dataValues.participantes.split(",")
-        console.log(integrantesGrupo)
+        //console.log(integrantesGrupo)
 
         const perfilesIntegrantes = []
         for(let integrante of integrantesGrupo){
@@ -512,7 +511,7 @@ export const getMiembrosGrupo = async (req,res) =>{
             )
 
             }
-        console.log(perfilesIntegrantes)
+        //console.log(perfilesIntegrantes)
         return res.status(200).json({ perfilesGrupo:perfilesIntegrantes });
     } catch (error) {
         console.log(error)
