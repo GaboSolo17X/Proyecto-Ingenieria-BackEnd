@@ -483,6 +483,11 @@ async function addAprovado(aspirantes, countestudiante) {
 }
 
 export const enviarCSV = async (req, res) => {
-  const archivoPath = req.body.direccion;
+  try {
+    const archivoPath = req.body.direccion;
   res.sendFile(path.resolve(archivoPath));
+  } catch (error) {
+    console.log(error)
+  }
+  
 };

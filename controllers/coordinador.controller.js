@@ -50,45 +50,56 @@ export const loginCoordinador = async (req, res) => {
 };
 
 export const historialAcademicoEstudiante = async (req, res) => {
-    const { numeroCuenta } = req.body;
-    const estudianteFound = await estudiante.findOne({where: {numeroCuenta}})
-    console.log(estudianteFound)
-    if(!estudianteFound){
-        return res.status(400).json({ message: "No se encontraron registros" , codigoError : 1 });
-    }else{
-        const historialFound = await historial.findAll({where: {numeroCuenta}});
-        if (historialFound.length === 0) {
-            return res.status(400).json({ message: "No se encontraron registros en el historial académico para este estudiante" , codigoError : 2});
+    try {
+        const { numeroCuenta } = req.body;
+        const estudianteFound = await estudiante.findOne({where: {numeroCuenta}})
+        console.log(estudianteFound)
+        if(!estudianteFound){
+            return res.status(400).json({ message: "No se encontraron registros" , codigoError : 1 });
+        }else{
+            const historialFound = await historial.findAll({where: {numeroCuenta}});
+            if (historialFound.length === 0) {
+                return res.status(400).json({ message: "No se encontraron registros en el historial académico para este estudiante" , codigoError : 2});
+            }
+            const indiceAcademicoFound = await indiceAcademico.findOne({where: {numeroCuenta}})
+            const {indiceGlobal} = indiceAcademicoFound
+            return res.status(200).json({ message: "Historial encontrado", historial: historialFound , estudiante: estudianteFound, indice: indiceGlobal});
         }
-        const indiceAcademicoFound = await indiceAcademico.findOne({where: {numeroCuenta}})
-        const {indiceGlobal} = indiceAcademicoFound
-        return res.status(200).json({ message: "Historial encontrado", historial: historialFound , estudiante: estudianteFound, indice: indiceGlobal});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error en el servidor" });
     }
     
 };
 
 export const solicitudesEstudiantes = async (req, res) => {
-    const solicitudesFound = await solicitud.findAll({where: {estado: "Pendiente"}});
-    let estudianteSolicitud = []
-    if(!solicitudesFound){
-        return res.status(400).json({ message: "No se encontraron registros" });
+    try {
+        const solicitudesFound = await solicitud.findAll({where: {estado: "Pendiente"}});
+        let estudianteSolicitud = []
+        if(!solicitudesFound){
+            return res.status(400).json({ message: "No se encontraron registros" });
+        }
+        for (const solicitud of solicitudesFound) {
+            const estudianteFound = await estudiante.findOne({where: { numeroCuenta: solicitud.dataValues.numeroCuenta}})
+            const {nombres, apellidos, correoPersonal} = estudianteFound
+            estudianteSolicitud.push({
+                nombreCompleto: nombres + " " + apellidos,
+                correo: correoPersonal
+            })
+        }
+       
+        
+        return res.status(200).json({ message: "Solicitudes encontradas", solicitudes: solicitudesFound, estudiante: estudianteSolicitud  });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error en el servidor" });
     }
-    for (const solicitud of solicitudesFound) {
-        const estudianteFound = await estudiante.findOne({where: { numeroCuenta: solicitud.dataValues.numeroCuenta}})
-        const {nombres, apellidos, correoPersonal} = estudianteFound
-        estudianteSolicitud.push({
-            nombreCompleto: nombres + " " + apellidos,
-            correo: correoPersonal
-        })
-    }
-   
-    
-    return res.status(200).json({ message: "Solicitudes encontradas", solicitudes: solicitudesFound, estudiante: estudianteSolicitud  });
 
 };
 
 export const obtenerSolicutudEsduiante = async (req, res) => {
-    const { idSolicitud } = req.body;
+    try {
+        const { idSolicitud } = req.body;
     const solicitudFound = await solicitud.findOne({where: {idSolicitud}});
     if(!solicitudFound){
         return res.status(400).json({ message: "No se encontraron registros" });
@@ -99,10 +110,15 @@ export const obtenerSolicutudEsduiante = async (req, res) => {
     const  indiceAcademicoFound = await indiceAcademico.findOne({where: {numeroCuenta}});
     const { indiceGlobal } = indiceAcademicoFound;
     return res.status(200).json({ message: "Solicitud encontrada", solicitud: { tipoSolicitud, recurso, diccionario, justificacion, estado, idMatricula, nombres, apellidos, centroRegional, correoPersonal, indiceGlobal, carrera } });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 };
 
 export const cargaAcademica = async (req, res) => {
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+    try {
+        pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
     const { numeroEmpleadoDocente, tipoArchivo} = req.body;
     let cargaAcademicaArray = [];
@@ -171,55 +187,71 @@ export const cargaAcademica = async (req, res) => {
         res.send(wbout);
         
     }
-
-
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Error en el servidor" });   
+    }
 };
 
 export const getAsignaturas = async (req, res) => {
-    const {idAsignatura} = req.body;
-    const asignaturasFound = await asignatura.findOne({where: {idAsignatura}})
-    return res.status(200).json({asignatura: asignaturasFound})
+    try {
+        const {idAsignatura} = req.body;
+        const asignaturasFound = await asignatura.findOne({where: {idAsignatura}})
+        return res.status(200).json({asignatura: asignaturasFound})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 }
 
 export const enviarPdf = async (req, res) => {
-    const {rutaPdf} = req.body
-    let ruta = 'http://localhost:3000/' + rutaPdf
-    return res.status(200).send({ruta})
+    try {
+        const {rutaPdf} = req.body
+        let ruta = 'http://localhost:3000/' + rutaPdf
+        return res.status(200).send({ruta})
+    } catch (error) {
+        console.log(error)
+    }
 };  
 
 export const actualizarSolicitud = async(req, res) =>{
-    const {idSolicitud, estado} = req.body
-    const solicitudFound = await solicitud.findOne({where:{idSolicitud}})
-    let {numeroCuenta, tipoSolicitud, diccionario} = solicitudFound.dataValues
-    if( tipoSolicitud == 'Cancelacion Excepcional'){
-        let clases = JSON.stringify(diccionario).split(",").map((item) => item.trim());
-        for (let index = 0; index < clases.length; index++) {
-            let resultado = clases[index].match(/([A-Z]+-\d+)/)
-            const asignaturaFound = await asignatura.findOne({where:{codigoAsignatura: resultado}})
-            const {idAsignatura} =  asignaturaFound.dataValues
-            const seccionFound = await seccion.findOne({where:{ idAsignatura }})
-            const {idSeccion} = seccionFound.dataValues
-            const matriculasFound = await matricula.findOne({where: {idSeccion}})
-            const {idMatricula,numeroCuenta, periodo} = matriculasFound.dataValues
-            let date = new Date().getFullYear()
-            console.log(date)
-            let newHistorial = {
-                numeroCuenta : numeroCuenta,
-                idAsignatura : idAsignatura,
-                calificacion : null,
-                estado: "ABN",
-                periodo: date + "-" + periodo,
+    try {
+        const {idSolicitud, estado} = req.body
+        const solicitudFound = await solicitud.findOne({where:{idSolicitud}})
+        let {numeroCuenta, tipoSolicitud, diccionario} = solicitudFound.dataValues
+        if( tipoSolicitud == 'Cancelacion Excepcional'){
+            let clases = JSON.stringify(diccionario).split(",").map((item) => item.trim());
+            for (let index = 0; index < clases.length; index++) {
+                let resultado = clases[index].match(/([A-Z]+-\d+)/)
+                const asignaturaFound = await asignatura.findOne({where:{codigoAsignatura: resultado}})
+                const {idAsignatura} =  asignaturaFound.dataValues
+                const seccionFound = await seccion.findOne({where:{ idAsignatura }})
+                const {idSeccion} = seccionFound.dataValues
+                const matriculasFound = await matricula.findOne({where: {idSeccion}})
+                const {idMatricula,numeroCuenta, periodo} = matriculasFound.dataValues
+                let date = new Date().getFullYear()
+                console.log(date)
+                let newHistorial = {
+                    numeroCuenta : numeroCuenta,
+                    idAsignatura : idAsignatura,
+                    calificacion : null,
+                    estado: "ABN",
+                    periodo: date + "-" + periodo,
+                }
+                const historialCreate = await historial.create(newHistorial)
+                const deleteMatricula = await matricula.destroy({where:{idMatricula}})
+                console.log(deleteMatricula)
+    
             }
-            const historialCreate = await historial.create(newHistorial)
-            const deleteMatricula = await matricula.destroy({where:{idMatricula}})
-            console.log(deleteMatricula)
-
+        }else if ( tipoSolicitud == 'Cambio de Centro'){
+            const estudianteFound = await estudiante.update({centroRegional:diccionario}, {where:{numeroCuenta}})
+        }else{
+            const estudianteFound = await estudiante.update({carrera:diccionario}, {where:{numeroCuenta}})
         }
-    }else if ( tipoSolicitud == 'Cambio de Centro'){
-        const estudianteFound = await estudiante.update({centroRegional:diccionario}, {where:{numeroCuenta}})
-    }else{
-        const estudianteFound = await estudiante.update({carrera:diccionario}, {where:{numeroCuenta}})
+        const updateSolicitudFound = await solicitud.update({estado: estado}, {where: {idSolicitud}});
+        return res.status(200).json({ message: "Solicitud actualizada" });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Error en el servidor" });
     }
-    const updateSolicitudFound = await solicitud.update({estado: estado}, {where: {idSolicitud}});
-    return res.status(200).json({ message: "Solicitud actualizada" });
 }

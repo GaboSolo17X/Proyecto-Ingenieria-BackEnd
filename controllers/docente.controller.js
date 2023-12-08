@@ -144,22 +144,28 @@ export const getDocenteByNumeroEmpleado = async (req, res) => {
 };
 
 export const getSeccionesDocente = async (req, res) => {
-    const { numeroEmpleadoDocente } = req.body;
-    const secciones = await seccion.findAll({ where: { numeroEmpleadoDocente } });
-    let asignaturas = []
-    for (const seccion of secciones) {
-         let asignaturasFound = await asignatura.findAll({ where: { idAsignatura: seccion.idAsignatura}})
-         asignaturas.push(asignaturasFound)
+    try {
+        const { numeroEmpleadoDocente } = req.body;
+        const secciones = await seccion.findAll({ where: { numeroEmpleadoDocente } });
+        let asignaturas = []
+        for (const seccion of secciones) {
+            let asignaturasFound = await asignatura.findAll({ where: { idAsignatura: seccion.idAsignatura}})
+            asignaturas.push(asignaturasFound)
+        }
+        if (secciones.length === 0) {
+            return res.status(400).json({ message: "El docente no tiene secciones asignadas" });
+        }
+        return res.status(200).json({ message: "Secciones encontradas", secciones , asignaturas });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" });
     }
-    if (secciones.length === 0) {
-        return res.status(400).json({ message: "El docente no tiene secciones asignadas" });
-    }
-    return res.status(200).json({ message: "Secciones encontradas", secciones , asignaturas });
 
 };
 
 export const descargarListadoEstudiantes = async (req, res) => {
-
+    try {
+        
     let {idSeccion} = req.body;
     idSeccion = parseInt(idSeccion);
     const direccion = `util/listadoEstudiantes${idSeccion}.xlsx`;
@@ -184,12 +190,15 @@ export const descargarListadoEstudiantes = async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: "Error en el servidor" });
     });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error en el servidor" }); 
+    }
 
 };
 
 export const getEstudiantesSeccion = async (req, res) => {
     try {
-        console.log("hola")
         const { idSeccion } = req.body;
         console.log(idSeccion)
         const estudiantesSeccion = await matricula.findAll({ where: { idSeccion } });
