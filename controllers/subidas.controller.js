@@ -6,6 +6,7 @@ import { aspirante } from "../models/aspiranteModel.js";
 import { estudiante } from "../models/estudianteModel.js";
 import { createObjectCsvWriter } from "csv-writer";
 import { carrera } from "../models/carreraModel.js";
+import { indiceAcademico } from "../models/indiceAcademicoModel.js";
 import path from "path";
 
 /// SUBIR CSV
@@ -384,6 +385,27 @@ export const creacionEstudiantes = async (req, res) => {
   }
 };
 
+async function asignarIndiceAcademico(numeroCuenta) {
+  try {
+    const estudiante = await estudiante.findOne({
+      where: { numeroCuenta: numeroCuenta },
+    });
+    if( estudiante == null){
+      console.log("No se encontro al estudiante");
+      return;
+    }else{
+      const indiceAcademico = 100;
+      const newIndiceAcademico = new indiceAcademico({
+      numeroCuenta: numeroCuenta,
+      indiceAcademico: indiceAcademico,
+      }); 
+    }
+    
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function addAprovado(aspirantes, countestudiante) {
   /*
     funcion asincronica para añadir estudiante a la base de datos a partir de la identidad del aspirante
@@ -477,6 +499,7 @@ async function addAprovado(aspirantes, countestudiante) {
 
     //guardado del estudiante en la base de datos
     const savedEstudiante = await newEstudiante.save();
+    asignarIndiceAcademico(numeroCuenta);
   } catch (error) {
     console.log(error);
   }

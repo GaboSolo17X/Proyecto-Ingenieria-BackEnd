@@ -32,7 +32,7 @@ export const loginEstudiante = async (req, res) => {
     });
     let estudiantePerfil = await perfilEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
     let fotoPerfil = await fotoEstudiante.findOne({ where: { numeroCuenta: numeroCuenta } });
-    console.log(estudiantePerfil)
+
 
     if (isEmpty(fotoPerfil || isEmpty(estudiantePerfil))) {
       fotoPerfil = await fotoEstudiante.create({
@@ -764,7 +764,7 @@ export const getCarreraMatricula = async (req, res) => {
     return res.status(200).json({ message: "Carreras Disponibles", Departamentos: carrerasDisponibles});
   } catch (error) {
     console.log(error);
-    return res.satatus(500).json({ message: "Error del servidor"});
+    return res.status(500).json({ message: "Error del servidor"});
   }
 };
 
