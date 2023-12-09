@@ -32,15 +32,15 @@ import { aula } from "./models/aulaModel.js";
 //import { fotoEstudiante } from "./models/fotoEstudianteModel.js";
 //import { perfilEstudiante } from "./models/perfilEstudianteModel.js";
 // import { solicitud } from "./models/solicitudesModel.js";
- //import { estado_Proceso } from "./models/estadoProceso.js";
+import { estado_Proceso } from "./models/estadoProceso.js";
  //import { indiceAcademico } from "./models/indiceAcademicoModel.js";
 import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
 import { evaluacion } from "./models/evaluacionModel.js";
 import { JustificacionCancelacionSeccion } from "./models/justificacionCancelacionSeccionModel.js";
- import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
+ //import {matriculaCancelada} from "./models/matriculaCanceladaModel.js"
 import {solicitud} from "./models/solicitudesModel.js"
 
- //
+
 const whiteList = [process.env.ORIGIN1, process.env.ORIGIN2];
 const app = express();
 const __filename = fileURLToPath(import.meta.url);

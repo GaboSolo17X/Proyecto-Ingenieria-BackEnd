@@ -17,7 +17,18 @@ export const estado_Proceso = sequelize.define(
     estado: {
       type: DataTypes.BOOLEAN, 
       allowNull: false,
-    }
+    },
+    //Formato YYYY-MM-DD
+    fechaInicioDelProceso: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    fechaFinDelProceso: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
+
   },
   {
     timestamps: false,
