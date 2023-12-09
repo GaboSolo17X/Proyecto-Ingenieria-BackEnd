@@ -16,7 +16,7 @@ export const getContactos = async (req, res) => {
             respuesta.push(conetnido);
         });
 
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const contactos = await chat.findAll({where: {idUsuario: respuesta[0]}});
         const contactos2 = await chat.findAll({where: {idUsuario2: respuesta[0]}});
@@ -82,7 +82,7 @@ export const getChats = async (req, res) => {
             respuesta.push(conetnido);
         });
 
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const chats1 = await chat.findAll({where: {idUsuario: respuesta[0]}});
         const chats2 = await chat.findAll({where: {idUsuario2: respuesta[0]}});
@@ -196,7 +196,7 @@ export const getSolicitudes = async (req, res) => {
             respuesta.push(conetnido);
         });
 
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const solicitudes = await solicitudChat.findAll({where: {idUsuario2: respuesta[0], estado: "Pendiente"}});
 
@@ -236,7 +236,7 @@ export const aceptarSolicitud = async (req, res) => {
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const solicitud = await solicitudChat.findOne({where: {idSolicitud: respuesta[0]}});
         solicitud.update({
@@ -274,7 +274,7 @@ export const rechazarSolicitud = async (req, res) => {
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const solicitud = await solicitudChat.findOne({where: {idSolicitud: respuesta[0]}});
         solicitud.estado = respuesta[1];
@@ -294,7 +294,7 @@ export const createGrupo = async (req, res) => {
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta[0]._value);
+        //console.log(respuesta[0]._value);
 
         if(respuesta[0]._value.length == 0){
             return res.status(400).json({ message: "el grupo no puede tener solo un integrante" });
@@ -334,7 +334,7 @@ export const getGrupos = async (req, res) => {
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+       // console.log(respuesta);
         const grupos = await grupo.findAll();
         //buscar los grupos del usuario
         const gruposUsuario = [];
@@ -386,7 +386,7 @@ export const salirGrupo = async (req, res) => {
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const grupo1 = await grupo.findOne({where: {idGrupo: respuesta[0]}});
 
@@ -419,7 +419,7 @@ export const getEstudiantesCentro = async (req, res) =>{
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const estudiantesCentro = await estudiante.findAll({where: {centroRegional: respuesta[0]}});
 
@@ -479,7 +479,7 @@ export const getMiembrosGrupo = async (req,res) =>{
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+        //console.log(respuesta);
 
         const grupoContenido = await grupo.findOne({where:{idGrupo:respuesta[0]}})
 
@@ -526,7 +526,7 @@ export const eliminarContacto = async (req,res) =>{
         forEach(req.body, async (conetnido) => {
             respuesta.push(conetnido);
         });
-        console.log(respuesta);
+       // console.log(respuesta);
 
         //Buscar el contacto(chat)
 
@@ -580,6 +580,63 @@ export const eliminarContacto = async (req,res) =>{
         }
 
         return res.status(200).json({ message: "algo extraño paso porque no se hizo nada" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
+    }
+}
+
+/* export const nuevoChat = async (req,res) =>{
+    try {
+        
+    } catch (error) {
+        console.log(error)
+        return 
+    }
+} */
+
+export const getMensajes = async (req,res) =>{
+    try {
+        //0.idChat 1.numeroCuenta
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta);
+
+        const chatContenido = await chat.findOne({where:{idChat:respuesta[0]}})
+
+        if(isNull(chatContenido)){
+            return res.status(200).json({ message: "No existe este chat" });    
+        }
+
+        if(chatContenido.dataValues.contenido == "."){
+            return res.status(200).json({ mensajes: [] });    
+        }
+
+        let contenidoChat = chatContenido.dataValues.contenido.split("\n")
+
+        let mensajes = []
+        for(let mensaje of contenidoChat){
+            if(mensaje == "."){
+                continue  
+            }
+            if(mensaje.split(":")[0] == respuesta[1]){
+                mensajes.push({
+                    "mensaje": mensaje.split(":")[1],
+                    "reciver":false,
+                    "sender":true
+                })
+            }else{
+                    mensajes.push({
+                        "mensaje": mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false
+                    })
+                }
+        }
+        console.log(mensajes)
+        return res.status(200).json({ mensajes });
     } catch (error) {
         console.log(error)
         return res.status(500).json({message: "Error del servidor"})

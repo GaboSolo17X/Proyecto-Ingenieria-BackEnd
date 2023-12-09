@@ -24,7 +24,7 @@ import chats from "./routes/chat.route.js"
 import jwt from "jsonwebtoken";
 import url from 'url';
 import querystring from 'querystring';
-
+import socket from './helpers/socketManager.js'
 
 import { asignatura } from "./models/asignaturaModel.js";
 import { seccion } from "./models/seccionModel.js";
@@ -55,34 +55,7 @@ const io = new Server(server, {
       methods: ["GET", "POST"] // Puedes especificar los métodos permitidos si es necesario
     }
 });
-
-io.on( 'connect', (socket) => {
-    console.log(`Se a conectado un usuario con id  ${socket.id}`)
-
-    socket.on('actualizacion', (numeroCuenta)=>{
-        socket.id = numeroCuenta
-        console.log(`se actualizo el socket id al ${socket.id}`)
-    })
-
-    socket.on('mensaje',(msg)=>{
-        console.log("mensaje recibido: "+msg)
-        io.emit("mensaje",msg)
-    })
-
-    socket.on('joinSala', (sala) => {
-        socket.join(sala);
-        console.log(`El usuario ${socket.id} se ha unido a la sala ${sala}`);
-      });
-    
-    socket.on('privado',(data)=>{
-        const { destinatario, mensaje } = data;
-        console.log(destinatario, mensaje)
-        io.to(destinatario).emit("privado",mensaje)
-    })
-
-    socket.on('disconnect', ()=>{console.log('se desconecto el usuario')})
-
-})
+socket(io)
 
 
 
@@ -152,3 +125,6 @@ app.get('/descargar/:rutaArchivo', (req, res) => {
 })
 
 server.listen(process.env.PORT, () => console.log(`Servidor Iniciado en el puerto http://localhost:${process.env.PORT}`));
+
+
+

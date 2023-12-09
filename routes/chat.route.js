@@ -11,7 +11,8 @@ import {
     salirGrupo,
     getEstudiantesCentro,
     getMiembrosGrupo,
-    eliminarContacto
+    eliminarContacto,
+    getMensajes
 } from '../controllers/chat.controller.js';
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.post('/salirGrupo', salirGrupo);
 router.post('/getEstudiantesCentro', getEstudiantesCentro);
 router.post('/getMiembrosGrupo', getMiembrosGrupo);
 router.post('/eliminarContacto', eliminarContacto);
+router.post('/getMensajes', getMensajes);
 
 export default router;
