@@ -1,0 +1,677 @@
+[
+    {
+        "posicion":1,
+        "categoria":"Comida",
+        "nombreEmpresa": "Burger King",
+        "logo":"../Img/Logos/LogoBK.png",
+        "header":"../Img/Header/categoria-BK.png",
+        "headermodal":"../Img/Header/categoriamodalBK.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Blv.Juan Pablo II"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"Aeropuerto Toncontin"
+            },
+            {
+                "numSucursal":3,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    },
+    {
+        "posicion":1,
+        "categoria":"Comida",
+        "nombreEmpresa": "Cinnabon",
+        "logo":"../Img/Logos/LogoCINNABON.png",
+        "header":"../Img/Header/categoria-CINNABON.jpg",
+        "headermodal":"../Img/Header/categoriamodalCINNABON.png",
+        "sucursales":[
+            {
+                "numSucursal":10,
+                "nameSucursal":"Blv.Juan Pablo II"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"City Mall"
+            },
+            {
+                "numSucursal":6,
+                "nameSucursal":"Multiplaza"
+            }
+        ]
+    },
+    {
+        "posicion":1,
+        "categoria":"Comida",
+        "nombreEmpresa": "El Morito",
+        "logo":"../Img/Logos/LogoElMorito.png",
+        "header":"../Img/Header/categoria-ElMorito.jpg",
+        "headermodal":"../Img/Header/categoriamodalElMorito.png",
+        "sucursales":[
+            {
+                "numSucursal":6,
+                "nameSucursal":"Ventu"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"Blv.La Hacienda"
+            },
+            {
+                "numSucursal":3,
+                "nameSucursal":"Col.Florencia Sur"
+            }
+        ]
+    },
+    {
+        "posicion":2,
+        "categoria":"Ropa",
+        "nombreEmpresa": "Bershka",
+        "logo":"../Img/Logos/LogoBershkaW.png",
+        "header":"../Img/Header/categoria-Bershka.jpg",
+        "headermodal":"../Img/Header/categoriamodalBershka.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Multiplaza"
+            }
+        ]
+    },
+    {
+        "posicion":2,
+        "categoria":"Ropa",
+        "nombreEmpresa": "Pull and Bear",
+        "logo":"../Img/Logos/LogoPULL&BEARW.png",
+        "header":"../Img/Header/categoria-PULL&BEAR.jpg",
+        "headermodal":"../Img/Header/categoriamodalPULL&BEAR.png",
+        "sucursales":[
+            {
+                "numSucursal":20,
+                "nameSucursal":"Multiplaza"
+            }
+        ]
+    },
+    {
+        "posicion":2,
+        "categoria":"Ropa",
+        "nombreEmpresa": "Zara Kids",
+        "logo":"../Img/Logos/LogoZARAW.png",
+        "header":"../Img/Header/categoria-ZARA.jpg",
+        "headermodal":"../Img/Header/categoriamodalZARA.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Multiplaza"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    },
+    {
+        "posicion":4,
+        "categoria":"Farmacias",
+        "nombreEmpresa": "Kielsa",
+        "logo":"../Img/Logos/LogoKielsa.png",
+        "header":"../Img/Header/categoria-Kielsa.jpg",
+        "headermodal":"../Img/Header/categoriamodalKielsa.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Blv.Juan Pablo II"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"Blv.Suyapa"
+            }
+        ]
+    },
+    {
+        "posicion":4,
+        "categoria":"Farmacias",
+        "nombreEmpresa": "Siman",
+        "logo":"../Img/Logos/LogoSiman.png",
+        "header":"../Img/Header/categoria-Siman.jpg",
+        "headermodal":"../Img/Header/categoriamodalSiman.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Blv.Juan Pablo II"
+            },
+            {
+                "numSucursal":10,
+                "nameSucursal":"Blv.Suyapa"
+            },
+            {
+                "numSucursal":22,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    },
+    {
+        "posicion":3,
+        "categoria":"Juegos",
+        "nombreEmpresa": "GameStation",
+        "logo":"../Img/Logos/LogoGameStation.png",
+        "header":"../Img/Header/categoria-GameStation.jpg",
+        "headermodal":"../Img/Header/categoriamodalGameStation.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    },
+    {
+        "posicion":3,
+        "categoria":"Juegos",
+        "nombreEmpresa": "Nintendo",
+        "logo":"../Img/Logos/LogoNintendo.png",
+        "header":"../Img/Header/categoria-Nintendo.jpg",
+        "headermodal":"../Img/Header/categoriamodalNintendo.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Ventu"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"Multiplaza"
+            },
+            {
+                "numSucursal":3,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    },
+    {
+        "posicion":3,
+        "categoria":"Juegos",
+        "nombreEmpresa": "Sony",
+        "logo":"../Img/Logos/LogoSONY.png",
+        "header":"../Img/Header/categoria-SONY.jpg",
+        "headermodal":"../Img/Header/categoriamodalSONY.png",
+        "sucursales":[
+            {
+                "numSucursal":1,
+                "nameSucursal":"Blv.Juan Pablo II"
+            },
+            {
+                "numSucursal":2,
+                "nameSucursal":"Aeropuerto Toncontin"
+            },
+            {
+                "numSucursal":3,
+                "nameSucursal":"City Mall"
+            }
+        ]
+    }
+]
+
+[
+ {
+        "idproducto":1,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Jeans Baggy.jpg",
+        "nombreProducto": "Jeans Baggy",
+        "descripcion": "Pantalon de Tela.",
+        "precio": 945
+    },
+    {
+        "idproducto":2,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Jogger.jpg",
+        "nombreProducto": "Jogger",
+        "descripcion": "Jeans Jogger Rotos.",
+        "precio": 1295
+    },
+    {
+        "idproducto":3,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Jean super Skinny.jpg",
+        "nombreProducto": "Jean Super Skinny",
+        "descripcion": "Jeans pegados azul.",
+        "precio": 1295
+    },
+    {
+        "idproducto":4,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa manga Corta cremallera.jpg",
+        "nombreProducto": "Camisa manga Corta cremallera",
+        "descripcion": "Camisa Negra.",
+        "precio": 1195
+    },
+    {
+        "idproducto":5,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa Twill rayas.jpg",
+        "nombreProducto": "Camisa Twill rayas",
+        "descripcion": "Camisa rayas azul y blanco.",
+        "precio": 745
+    },
+    {
+        "idproducto":6,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa Popelin Print.jpg",
+        "nombreProducto": "Camisa Popelin Print",
+        "descripcion": "Camisa estampada.",
+        "precio": 945
+    },
+    {
+        "idproducto":7,
+        "empresa":"Bershka",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa Oversize.jpg",
+        "nombreProducto": "Camisa Oversize",
+        "descripcion": "Camisa manga larga efecto lavado.",
+        "precio": 1195
+    },
+    {
+        "idproducto":8,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Blusa Satinada Nudo.jpg",
+        "nombreProducto": "Blusa Satinada Nudo",
+        "descripcion": "Blusa manga larga negra.",
+        "precio": 745
+    },
+    {
+        "idproducto":9,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa Saten.jpg",
+        "nombreProducto": "Camisa Saten",
+        "descripcion": "Camisa manga larga estampado blanco y negro.",
+        "precio": 745
+    },
+    {
+        "idproducto":10,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Blusa Satinada escote V.jpg",
+        "nombreProducto": "Blusa escote V",
+        "descripcion": "Blusa manga larga.",
+        "precio": 745
+    },
+    {
+        "idproducto":11,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Jeans Flare.jpg",
+        "nombreProducto": "Jeans Flare",
+        "descripcion": "Jeans azul claro.",
+        "precio": 895
+    },
+    {
+        "idproducto":12,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Bermuda.jpg",
+        "nombreProducto": "Bermuda",
+        "descripcion": "Bermuda corte masculino negro.",
+        "precio": 745
+    },
+    {
+        "idproducto":13,
+        "empresa":"Bershka",
+        "genero":"Femenino",
+        "seccion":"Pantalones-Faldas",
+        "img":"../Img/Productos/Falda mini Frunce.jpg",
+        "nombreProducto": "Falda mini Frunce",
+        "descripcion": "Falda Amarilla.",
+        "precio": 745
+    },
+
+
+
+
+    {
+        "idproducto":1,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa cuadros.jpg",
+        "nombreProducto": "Camisa cuadros",
+        "descripcion": "Camisa Manga larga verde y blanco.",
+        "precio": 1195
+    },
+    {
+        "idproducto":2,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa print.jpg",
+        "nombreProducto": "Camisa print",
+        "descripcion": "Camisa manga corta naranja estampado.",
+        "precio": 845
+    },
+    {
+        "idproducto":3,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Camisa Batman.jpg",
+        "nombreProducto": "Camisa Batman",
+        "descripcion": "Camisa manga corta negra.",
+        "precio": 545
+    },
+    {
+        "idproducto":4,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Pantalones",
+        "img":"../Img/Productos/JoggerContraste.jpg",
+        "nombreProducto": "Jogger",
+        "descripcion": "Pantalon Jogger Detalles Contraste.",
+        "precio": 645
+    },
+    {
+        "idproducto":5,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Pantalones",
+        "img":"../Img/Productos/Peto Largo.jpg",
+        "nombreProducto": "Peto Largo",
+        "descripcion": "Peto Largo Azul Marino.",
+        "precio": 1495
+    },
+    {
+        "idproducto":6,
+        "empresa":"Pull and Bear",
+        "genero":"Masculino",
+        "seccion":"Pantalones",
+        "img":"../Img/Productos/Jeans Carrot Rotos.jpg",
+        "nombreProducto": "Jeans Carrot Rotos",
+        "descripcion": "Jeans Fit.",
+        "precio": 1195
+    },
+    {
+        "idproducto":7,
+        "empresa":"Pull and Bear",
+        "seccion":"Pantalones",
+        "img":"../Img/Productos/Pantalon Metalizado.jpg",
+        "nombreProducto": "Pantalon Metalizado",
+        "descripcion": "Pantalon Verde Recto Metalizado.",
+        "precio": 1195
+    },
+    {
+        "idproducto":8,
+        "empresa":"Pull and Bear",
+        "seccion":"Pantalones",
+        "img":"../Img/Productos/Mini Falda Frunce.jpg",
+        "nombreProducto": "Mini Falda Frunce",
+        "descripcion": "Minifalda morada.",
+        "precio": 695
+    },
+    {
+        "idproducto":9,
+        "empresa":"Pull and Bear",
+        "seccion":"Pantalon",
+        "img":"../Img/Productos/Jean Corte FlareP&B.jpg",
+        "nombreProducto": "Jean Corte Flare",
+        "descripcion": "Jean Azul.",
+        "precio": 845
+    },
+    {
+        "idproducto":10,
+        "empresa":"Pull and Bear",
+        "genero":"Femenino",
+        "seccion":"Vestidos",
+        "img":"../Img/Productos/Vestido Corto.jpg",
+        "nombreProducto": "Vestido Corto",
+        "descripcion": "Vestido Corto Verde Asimetrico.",
+        "precio": 945
+    },
+    {
+        "idproducto":11,
+        "empresa":"Pull and Bear",
+        "genero":"Vestidos",
+        "seccion":"Camisas",
+        "img":"../Img/Productos/Peto Vaquero Rayas.jpg",
+        "nombreProducto": "Peto Vaquero Rayas",
+        "descripcion": "Peto Rayado Azul marino.",
+        "precio": 1295
+    },
+    {
+        "idproducto":12,
+        "empresa":"Pull and Bear",
+        "genero":"Femenino",
+        "seccion":"Vestidos",
+        "img":"../Img/Productos/Vestido Tirante Strass.jpg",
+        "nombreProducto": "Vestido Tirante Strass",
+        "descripcion": "Vestido Satinado tirantes.",
+        "precio": 1195
+    },
+    
+
+
+
+
+    {
+        "idproducto":1,
+        "empresa":"Zara Kids",
+        "genero":"Femenino",
+        "seccion":"Camisa kids",
+        "img":"../Img/Productos/Camiseta Textos.jpg",
+        "nombreProducto": "Camiseta Textos",
+        "descripcion": "Camiseta cuello redondo estampada amarilla.",
+        "precio": 175
+    },
+    {
+        "idproducto":2,
+        "empresa":"Zara Kids",
+        "seccion":"Camisa kids",
+        "img":"../Img/Productos/Camiseta Tie Dye.jpg",
+        "nombreProducto": "Camiseta Tie Dye",
+        "descripcion": "Camiseta cuello redondo y manga corta.",
+        "precio": 395
+    },
+    {
+        "idproducto":3,
+        "empresa":"Zara Kids",
+        "genero":"Femenino",
+        "seccion":"Camisa kids",
+        "img":"../Img/Productos/Camiseta Snoopy.jpg",
+        "nombreProducto": "Camiseta Snoopy",
+        "descripcion": "Camiseta cuello redondo y manga corta estampada blanca.",
+        "precio": 345
+    },
+    {
+        "idproducto":4,
+        "empresa":"Zara Kids",
+        "genero":"Femenino",
+        "seccion":"Patalon kids",
+        "img":"../Img/Productos/Jeans Extreme Wide Leg.jpg",
+        "nombreProducto": "Jeans Extreme Wide Leg",
+        "descripcion": "Jean wide azul.",
+        "precio": 795
+    },
+    {
+        "idproducto":5,
+        "empresa":"Zara Kids",
+        "genero":"Femenino",
+        "seccion":"Pantalon kids",
+        "img":"../Img/Productos/Jeans Wide Leg.jpg",
+        "nombreProducto": "Jeans Wide Leg",
+        "descripcion": "Jeans wide leg violeta.",
+        "precio": 795
+    },
+    {
+        "idproducto":6,
+        "empresa":"Zara Kids",
+        "genero":"Femenino",
+        "seccion":"Pantalon kids",
+        "img":"../Img/Productos/Pantalon Cuadrado Vichy.jpg",
+        "nombreProducto": "Pantalon Cuadrado Vichy",
+        "descripcion": "Pantalon de cuadros con cintura elástica rojo.",
+        "precio": 795
+    },
+    {
+        "idproducto":7,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Pantalon kids",
+        "img":"../Img/Productos/Pantalon Cargo Canvas.jpg",
+        "nombreProducto": "Pantalon Cargo Canvas",
+        "descripcion": "Pantalon cintura ajustable.",
+        "precio": 795
+    },
+    {
+        "idproducto":8,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Pantalon kids",
+        "img":"../Img/Productos/Bermuda Denim Straight.jpg",
+        "nombreProducto": "Bermuda Denim Straight",
+        "descripcion": "Short bermuda cintura ajustable azul claro.",
+        "precio": 595
+    },
+    {
+        "idproducto":9,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Pantalon kids",
+        "img":"../Img/Productos/Pantalon Jogger Cargo.jpg",
+        "nombreProducto": "Pantalon Jogger Cargo",
+        "descripcion": "Jogger elástico verde gris.",
+        "precio": 395
+    },
+    {
+        "idproducto":10,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Sudadera kids",
+        "img":"../Img/Productos/Sudadera Looney tunes.jpg",
+        "nombreProducto": "Sudadera Looney tunes",
+        "descripcion": "Sudadera negra.",
+        "precio": 395
+    },
+    {
+        "idproducto":11,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Sudadera kids",
+        "img":"../Img/Productos/Sudadera Lisa.jpg",
+        "nombreProducto": "Sudadera Lisa",
+        "descripcion": "Sudadera pistacho claro.",
+        "precio": 475
+    },
+    {
+        "idproducto":12,
+        "empresa":"Zara Kids",
+        "genero":"Masculino",
+        "seccion":"Sudadera kids",
+        "img":"../Img/Productos/Sudadera Embossed California.jpg",
+        "nombreProducto": "Sudadera Embossed California",
+        "descripcion": "Sudadera tipo college naranja.",
+        "precio": 645
+    }
+
+
+id:6789
+contra:Spicy10
+
+id:1249
+contra:Bata10
+
+id:2871
+contra:chels0
+
+id:6942
+contra:Afrt!20
+
+]
+
+[
+  {
+    "id": 6789,
+    "perfilImg": "../Img/PerfilesMoto/moto1.jpg",
+    "nombre": "Luis Miguel",
+    "password": "bd325d811060873799a2ef8e7ae390611a6d27ec",
+    "telefono": 89602342,
+    "estado": "activo"
+  },
+  {
+    "id": 1249,
+    "perfilImg": "../Img/PerfilesMoto/moto2.jpg",
+    "nombre": "Mark Ruffalo",
+    "password": "f4af75c8acb52eeb6df0513bb42891a0f187cbbd",
+    "telefono": 32475898,
+    "estado": "denegado"
+  },
+  {
+    "id": 2871,
+    "perfilImg": "../Img/PerfilesMoto/moto3.jpg",
+    "nombre": "Mason Mount",
+    "password": "ee21230ed8455ce99a94fb5f480c4c05584e574f",
+    "telefono": 32789640,
+    "estado": "denegado"
+  },
+  {
+    "id": 6942,
+    "perfilImg": "../Img/PerfilesMoto/moto4.jpg",
+    "nombre": "Jeniffer Mendoza",
+    "password": "36dd41c955415e23418dbbfa20f1de46fb6d46e1",
+    "telefono": 87502343,
+    "estado": "activo"
+  }
+]
+{
+    "numPedido": 14,
+    "user": "Fede Omar",
+    "telefono": 95665544,
+    "latitud": 14.068609367480395,
+    "longitud": -87.16521351446207,
+    "direccion": "El Hato",
+    "Referencias": "Calle de mentira,cerca de la casa roja",
+    "pago": "Tarjeta",
+    "nombreEmpresa": "Burger King",
+    "numSucursal": 1,
+    "nameSucursal": "Blv.Juan Pablo II",
+    "logo": "../Img/Logos/LogoBK.png",
+    "img": "../Img/Productos/Whopper.png",
+    "nombreProducto": "Whopper",
+    "descripcion": "Carne de res asada a la parrilla, pepinillos, cebolla, tomate, lechuga, ketchup y mayonesa en pan con semillas de ajonjoli.",
+    "cantidad": 2,
+    "gasto": 120,
+    "estatus": "enEspera"
+  }
+
+
+ {
+    "id": 1,
+    "nickname":"GaboSolo17x",
+    "nombre": "Gabriel",
+    "apellido": "Solorzano",
+    "correo": "g17force@gmail.com",
+    "password": "liverpool6Ch"
+  },
+  {
+    "id": 2,
+    "nickname":"Alecass",
+    "nombre": "Alejandro",
+    "apellido": "Cruz",
+    "correo": "Amaster69@gmail.com",
+    "password": "barca4love"
+  }

@@ -6,6 +6,7 @@ import { perfilEstudiante } from "../models/perfilEstudianteModel.js";
 import { fotoEstudiante } from "../models/fotoEstudianteModel.js";
 import { forEach, isEmpty, isNull,isUndefined } from "underscore";
 import mailer from "../config/confMailer.js";
+import multer from "multer";
 
 //nombre, numero cuenta, foto
 export const getContactos = async (req, res) => {
@@ -402,7 +403,9 @@ export const salirGrupo = async (req, res) => {
             grupo1.destroy()
             return res.status(200).json({ message: "Salio del grupo y se eilimino porque no quedan integrantes" });
         }
-        grupo1.participantes = participantes2.toString();
+        grupo1.update({
+            participantes: participantes2.toString()
+        })
         grupo1.save();
 
         return res.status(200).json({ message: "Salio del grupo" });
@@ -491,22 +494,23 @@ export const getMiembrosGrupo = async (req,res) =>{
 
         const perfilesIntegrantes = []
         for(let integrante of integrantesGrupo){
-            console.log(integrante)
+            //console.log(integrante)
             const estudiantesInfo = await estudiante.findOne({where: {numeroCuenta: integrante}});
             const perfilEstudianteInfo = await perfilEstudiante.findOne({where: {numeroCuenta: integrante}});
-            console.log(perfilEstudianteInfo)
+            //console.log(perfilEstudianteInfo)
             const fotoEstudianteInfo = await fotoEstudiante.findOne({where: {idfotoEstudiante: perfilEstudianteInfo.dataValues.idfotoEstudiante}});
             if(isNull(estudiantesInfo) || isNull(perfilEstudianteInfo) || isNull(fotoEstudianteInfo)){
 
-                console.log(isNull(estudiantesInfo),isNull(perfilEstudianteInfo),isNull(fotoEstudianteInfo))
+                //console.log(isNull(estudiantesInfo),isNull(perfilEstudianteInfo),isNull(fotoEstudianteInfo))
                 return res.status(200).json({ message: "Hay un problema con los miembros del grupo" });    
 
             }
 
             perfilesIntegrantes.push(
-                {
+                {   
                     "nombre": estudiantesInfo.dataValues.nombres.split(" ")[0]+" "+estudiantesInfo.dataValues.apellidos.split(" ")[0],
-                    "foto": fotoEstudianteInfo.dataValues.fotoEstudiante
+                    "foto": fotoEstudianteInfo.dataValues.fotoEstudiante,
+                    "numeroCuenta": estudiantesInfo.dataValues.numeroCuenta,
                 }
             )
 
@@ -586,14 +590,6 @@ export const eliminarContacto = async (req,res) =>{
     }
 }
 
-/* export const nuevoChat = async (req,res) =>{
-    try {
-        
-    } catch (error) {
-        console.log(error)
-        return 
-    }
-} */
 
 export const getMensajes = async (req,res) =>{
     try {
@@ -603,6 +599,8 @@ export const getMensajes = async (req,res) =>{
             respuesta.push(conetnido);
         });
         console.log(respuesta);
+        const archivoFiles = ["pdf","xlsx","docx","txt","pptx","mp4"]
+        const archivosImagenes = ["jpg","png","jpeg","gif","svg"]
 
         const chatContenido = await chat.findOne({where:{idChat:respuesta[0]}})
 
@@ -619,23 +617,72 @@ export const getMensajes = async (req,res) =>{
         let mensajes = []
         for(let mensaje of contenidoChat){
             if(mensaje == "."){
-                continue  
+                continue
             }
             if(mensaje.split(":")[0] == respuesta[1]){
+                if(archivoFiles.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":false,
+                        "sender":true,
+                        "archivo":true,
+                        "tipo":mensaje.split(".")[mensaje.split(".").length-1],
+                        "nombre": mensaje.split(":")[1].split("/")[mensaje.split(":")[1].split("/").length-1].split("-")[1]
+                    })
+                    continue
+                }
+                
+
+                if(archivosImagenes.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":false,
+                        "sender":true,
+                        "archivo":true,
+                        "tipo":"imagen"
+                    })
+                    continue
+                }
                 mensajes.push({
                     "mensaje": mensaje.split(":")[1],
                     "reciver":false,
-                    "sender":true
+                    "sender":true,
+                    "archivo":false,
+                    "tipo":""
                 })
             }else{
+
+                if(archivoFiles.includes(mensaje.split(".")[mensaje.split(".").length-1])){
                     mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false,
+                        "archivo":true,
+                        "tipo":mensaje.split(".")[mensaje.split(".").length-1],
+                        "nombre": mensaje.split(":")[1].split("/")[mensaje.split(":")[1].split("/").length-1].split("-")[1]
+                    })
+                    continue
+                }
+                if(archivosImagenes.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false,
+                        "archivo":true,
+                        "tipo":"imagen"
+                    })
+                    continue
+                }
+                mensajes.push({
                         "mensaje": mensaje.split(":")[1],
                         "reciver":true,
-                        "sender":false
+                        "sender":false,
+                        "archivo":false,
+                        "tipo":""
                     })
                 }
         }
-        console.log(mensajes)
+        //console.log(mensajes)
         return res.status(200).json({ mensajes });
     } catch (error) {
         console.log(error)
@@ -643,3 +690,221 @@ export const getMensajes = async (req,res) =>{
     }
 }
 
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "public/chatFiles/");//gabi dame permisos
+    },
+    filename: (req, file, cb) => {
+      req.body.nameFile = Date.now() + "-" + file.originalname;
+      cb(null, req.body.nameFile);
+    },
+  });
+  
+const upload = multer({ storage: storage });
+  
+export const contEnvioArchivos = upload.single("archivo");
+
+export const envioArchivos = async (req,res) =>{
+    try {
+        //0.idGrupo 1.numeroCuenta 
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta);
+
+        const chatContenido = await chat.findOne({where:{idChat:respuesta[0]}})
+
+        if(isNull(chatContenido)){
+            return res.status(200).json({ message: "No existe este chat" });    
+        }
+
+        chatContenido.update({
+            contenido: chatContenido.dataValues.contenido.concat("\n"+`${respuesta[1]}:${req.file.filename}`)
+        })
+        chatContenido.save()
+        return res.status(200).json({ message: "Se envio el archivo" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
+    }
+
+}
+
+export const getMensajesGrupo = async (req,res) =>{
+    try {
+        //0.idGrupo 1.numeroCuenta
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta);
+        const archivoFiles = ["pdf","xlsx","docx","txt","pptx","mp4"]
+        const archivosImagenes = ["jpg","png","jpeg","gif","svg"]
+
+        const chatContenido = await grupo.findOne({where:{idGrupo:respuesta[0]}})
+
+        if(isNull(chatContenido)){
+            return res.status(200).json({ message: "No existe este grupo" });    
+        }
+
+        if(chatContenido.dataValues.contenido == "."){
+            return res.status(200).json({ mensajes: [] });    
+        }
+
+        let contenidoChat = chatContenido.dataValues.contenido.split("\n")
+
+        let mensajes = []
+        for(let mensaje of contenidoChat){
+            if(mensaje == "."){
+                continue
+            }
+            const estudiante1 = await estudiante.findOne({where: {numeroCuenta: mensaje.split(":")[0]}});
+                
+
+            if(mensaje.split(":")[0] == respuesta[1]){
+                
+                if(archivoFiles.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":false,
+                        "sender":true,
+                        "archivo":true,
+                        "tipo":mensaje.split(".")[mensaje.split(".").length-1],
+                        "nombre": mensaje.split(":")[1].split("/")[mensaje.split(":")[1].split("/").length-1].split("-")[1],
+                        "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                    })
+                    continue
+                }
+                
+
+                if(archivosImagenes.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":false,
+                        "sender":true,
+                        "archivo":true,
+                        "tipo":"imagen",
+                        "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                    })
+                    continue
+                }
+                mensajes.push({
+                    "mensaje": mensaje.split(":")[1],
+                    "reciver":false,
+                    "sender":true,
+                    "archivo":false,
+                    "tipo":"",
+                    "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                })
+            }else{
+                if(archivoFiles.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false,
+                        "archivo":true,
+                        "tipo":mensaje.split(".")[mensaje.split(".").length-1],
+                        "nombre": mensaje.split(":")[1].split("/")[mensaje.split(":")[1].split("/").length-1].split("-")[1],
+                        "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                    })
+                    continue
+                }
+                if(archivosImagenes.includes(mensaje.split(".")[mensaje.split(".").length-1])){
+                    mensajes.push({
+                        "mensaje": "public/chatFiles/"+mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false,
+                        "archivo":true,
+                        "tipo":"imagen",
+                        "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                    })
+                    continue
+                }
+                
+                mensajes.push({
+                        "mensaje": mensaje.split(":")[1],
+                        "reciver":true,
+                        "sender":false,
+                        "archivo":false,
+                        "tipo":"",
+                        "nombreEstudiante": estudiante1.dataValues.nombres.split(" ")[0]+" "+estudiante1.dataValues.apellidos.split(" ")[0]
+                    })
+                }
+        }
+
+    return res.status(200).json({ mensajes });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
+    }
+}
+export const contEnvioArchivosGrupo = upload.single("archivo");
+
+export const envioArchivosGrupo = async (req,res) =>{
+    try {
+        //0.idGrupo 1.numeroCuenta 
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+        console.log(respuesta,req.file.filename);
+
+        const grupoContenido= await grupo.findOne({where:{idGrupo:respuesta[0]}})
+
+        if(isNull(grupoContenido)){
+            return res.status(200).json({ message: "No existe este grupo" });    
+        }
+
+        grupoContenido.update({
+            contenido: grupoContenido.dataValues.contenido.concat("\n"+`${respuesta[1]}:${req.file.filename}`)
+        })
+        grupoContenido.save()
+        return res.status(200).json({ message: "Se envio el archivo" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
+    }
+}
+
+export const nuevoChat = async (req,res) =>{
+    try {
+        //0.numeroCuenta(propio) 1.numeroCuenta2(del otro)
+        const respuesta = [];
+        forEach(req.body, async (conetnido) => {
+            respuesta.push(conetnido);
+        });
+
+        console.log("esto es del nuevo chat:",respuesta);
+
+        const chatContenido = await chat.findOne({where:{idUsuario:respuesta[0],idUsuario2:respuesta[1]}})
+        const chatContenido1 = await chat.findOne({where:{idUsuario:respuesta[1],idUsuario2:respuesta[0]}})
+
+        if(isNull(chatContenido) && isNull(chatContenido1)){
+            return res.status(200).json({ message: "No existe este chat" });    
+        }
+
+        if(!isNull(chatContenido)){
+            chatContenido.update({
+                estado: true
+            })
+
+            chatContenido.save()    
+        }        
+        if(!isNull(chatContenido1)){
+            chatContenido1.update({
+                estado: true
+            })
+    
+            chatContenido1.save() 
+        }
+
+       
+
+        return res.status(200).json({ message: "Se creo el chat" });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message: "Error del servidor"})
+    }
+}

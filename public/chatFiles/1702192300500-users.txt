@@ -1,0 +1,449 @@
+ESTUDIANTES
+
+Varias Clases Pasadas
+2023100009 - Weslin Francisco
+CUW1960
+
+No Matricula por indice 79
+2023100006 - Nicolas Rigoberto
+CUN7165
+
+Puede matricular otras diferentes del 20231000009
+Matricular Contabilidad
+2023100008 - Victor Darwin
+CUV3265
+
+Matricular Contabilidad
+2023100007 - Hernan Marcio
+CUH3245
+
+DOCENTES
+Imparte 3 clases
+0201000009- Ricardo Arjona
+23451ArjonaRicardo
+
+Filosofia 
+0201000008-Brad Carlos
+20031PittBrad
+
+201000007
+20134deFrenkie
+
+
+<script>
+{/* <FontAwesomeIcon icon="fa-solid fa-person-circle-question" /> */}
+import chatbox from "../components/chatBox.vue";
+import groupChat from "../components/groupChatBox.vue";
+import { ref, onMounted } from "vue";
+export default {
+  components: {
+    chatbox,
+    groupChat,
+  },
+
+  props: {
+    cuenta: String,
+    centro: String,
+  },
+
+  setup(props) {
+    const nombreGrupo = ref("");
+    const usuariosSeleccionados = ref([]);
+    const activeChat = ref(false);
+    const sender = ref("");
+    const usuarios = ref([]);
+    const solicitudes = ref([]);
+    const contactos = ref([]);
+
+    // const btnEnviar = ref(true);
+    // const btnEnviado = ref(false);
+
+    const cuenta = props.cuenta;
+    const centro = props.centro;
+
+    const obtenerEstudiantes = async () => {
+      console.log(centro);
+      try {
+        const res = await fetch(
+          "http://localhost:3000/chat/getEstudiantesCentro",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              centroEstu: centro,
+              cuentaEstu: cuenta,
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log(data);
+
+        usuarios.value = data.estudiantesInfo;
+        console.log(usuarios.value);
+
+        usuarios.value = usuarios.value.filter(
+          (usuario) => !usuario.contactado || usuario.contactado === false
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const enviarSolicitud = async (id) => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/createSolicitud", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cuentaEstu: cuenta,
+            cuentaSoli: id,
+          }),
+        });
+        const data = await res.json();
+        console.log(data.message);
+
+        // if(data.message=='Solicitud enviada'){
+
+        // }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const filteredContactos = ref([]);
+    const filteredContactos2 = ref([]);
+    const searchQuery = ref("");
+    const searchQuery2 = ref("");
+
+    const filterContactos = () => {
+      const query = searchQuery.value.toLowerCase();
+      filteredContactos.value = usuarios.value.filter((contacto) => {
+        const nombreInicial = contacto.nombre.charAt(0).toLowerCase();
+        return (
+          nombreInicial === query ||
+          contacto.nombre.toLowerCase().includes(query) ||
+          contacto.numeroCuenta.includes(query)
+        );
+      });
+    };
+
+    const filterContactos2 = () => {
+      const query = searchQuery2.value.toLowerCase();
+      filteredContactos2.value = contactos.value.filter((contacto) => {
+        const nombreInicial = contacto.nombre.charAt(0).toLowerCase();
+        return (
+          nombreInicial === query ||
+          contacto.nombre.toLowerCase().includes(query)
+        );
+      });
+    };
+
+    const getSolicitud = async () => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/getSolicitudes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cuentaEstu: cuenta,
+          }),
+        });
+        const data = await res.json();
+        console.log(data);
+
+        solicitudes.value = data.solicitudes;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const getContactos = async () => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/getContactos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cuentaEstu: cuenta,
+          }),
+        });
+        const data = await res.json();
+        console.log(data);
+        contactos.value = data.contactos;
+
+        solicitudes.value = data.solicitudes;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    //ABRIR CHATS
+
+    const selectedChat = (chat) => {
+      console.log(chat);
+      activeChat.value = true;
+      sender.value = chat.sender;
+      activeGroupChat.value = false;
+    };
+
+    const activeGroupChat = ref(false);
+    const selectGroup = (group) => {
+      activeGroupChat.value = true;
+      console.log(group);
+      activeChat.value = false;
+    };
+
+    //SOLICITUDES
+
+    const aceptar = async (sender, receive, id) => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/aceptarSolicitud", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idSolicitud: id,
+            respuesta: "Aceptada",
+            idUsuario: sender,
+            idUsuario2: receive,
+          }),
+        });
+        const data = await res.json();
+        console.log(data.message);
+        getSolicitud();
+
+        // if(data.message=='Solicitud enviada'){
+
+        // }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const aceptarSoli = (sender, receive, id) => {
+      console.log("Has aceptado a la solicitud " + id);
+      aceptar(sender, receive, id);
+    };
+
+    const rechazar = async (sender, receive, id) => {
+      console.log(centro);
+      try {
+        const res = await fetch(
+          "http://localhost:3000/chat/rechazarSolicitud",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              idSolicitud: id,
+              respuesta: "Rechazada",
+              idUsuario: sender,
+              idUsuario2: receive,
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log(data.message);
+        getSolicitud();
+
+        // if(data.message=='Solicitud enviada'){
+
+        // }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const rechazarSoli = (sender, receive, id) => {
+      console.log("Has rechazado a la solicutd " + id);
+      rechazar(sender, receive, id);
+    };
+
+    const solicitudEnviada = (id, index) => {
+      console.log("Haz enviado una solicitud a " + id);
+      usuarios.value[index].solicitudEnviada = true;
+      enviarSolicitud(id);
+      obtenerEstudiantes();
+      filterContactos();
+    };
+
+    //GRUPOS
+    const crearGrupo = async (name, usuarios) => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/createGrupo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuariosGrupo: usuarios,
+            nombresGrupo: name,
+          }),
+        });
+        const data = await res.json();
+        console.log(data.message);
+
+        getGrupos();
+
+        // if(data.message=='Solicitud enviada'){
+
+        // }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const limpiarFormulario = () => {
+      nombreGrupo.value = "";
+      usuariosSeleccionados.value = [];
+    };
+
+    const myUser = ref();
+    const submit = () => {
+      myUser.value = cuenta;
+      console.log("Nombre del grupo:", nombreGrupo.value);
+      console.log("Usuarios seleccionados:", usuariosSeleccionados.value);
+      console.log("Usuarios seleccionados1:", myUser);
+      console.log("Usuarios seleccionados2:", myUser.value);
+      usuariosSeleccionados.value.push(myUser.value);
+
+      console.log("Usuarios seleccionados5:", usuariosSeleccionados.value);
+      crearGrupo(nombreGrupo, usuariosSeleccionados);
+
+      limpiarFormulario();
+    };
+
+    const grupos = ref([]);
+    const getGrupos = async () => {
+      console.log(centro);
+      try {
+        const res = await fetch("http://localhost:3000/chat/getGrupos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuario: cuenta,
+          }),
+        });
+        const data = await res.json();
+        console.log(data);
+        grupos.value = data.grupos;
+
+        // if(data.message=='Solicitud enviada'){
+
+        // }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    onMounted(() => {
+      obtenerEstudiantes();
+      usuarios.value.forEach((usuario) => {
+        usuario.solicitudEnviada = false;
+      });
+
+      getSolicitud();
+      getContactos();
+      getGrupos();
+    });
+
+    return {
+      nombreGrupo,
+      usuariosSeleccionados,
+      activeChat,
+      activeGroupChat,
+      sender,
+      submit,
+      aceptarSoli,
+      rechazarSoli,
+      solicitudEnviada,
+      selectedChat,
+      selectGroup,
+      usuarios,
+      filteredContactos,
+      filteredContactos2,
+      searchQuery,
+      searchQuery2,
+      filterContactos,
+      filterContactos2,
+      solicitudes,
+      contactos,
+      grupos,
+      // btnEnviar,
+      // btnEnviado,
+    };
+  },
+  data() {
+    return {
+      dialog: false,
+      notifications: false,
+      sound: true,
+      widgets: false,
+      dialogCrearGrupo: false,
+      dialogAgregarEstudiante: false,
+      dialogContactos: false,
+
+      chats: [
+        {
+          id: 1,
+          sender: "Usuario1",
+          message: "Hola, ¿cómo estás?",
+          img: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
+        },
+        {
+          id: 2,
+          sender: "Usuario2",
+          message: "¡Hola! Estoy bien, gracias.",
+          img: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
+        },
+      ],
+      selectedTab: "chats",
+
+      selectedTab: "grupos",
+
+      selectedTab: "solicitud",
+
+      selectedPop: null,
+    };
+  },
+  computed: {},
+  methods: {
+    selectTab(tab) {
+      this.selectedTab = tab;
+    },
+    selectPop(pop) {
+      this.selectedPop = pop;
+    },
+    // filterContactos() {
+    //   const query = this.searchQuery.toLowerCase();
+    //   this.filteredContactos = this.usuarios.filter((contacto) => {
+    //     // Filtrar por inicial del nombre
+    //     const nombreInicial = contacto.sender.charAt(0).toLowerCase();
+    //     // Filtrar por nombre o número de cuenta
+    //     return (
+    //       nombreInicial === query ||
+    //       contacto.nombre.toLowerCase().includes(query) ||
+    //       contacto.numeroCuenta.includes(query)
+    //     );
+    //   });
+    // },
+  },
+};
+</script>
+
+

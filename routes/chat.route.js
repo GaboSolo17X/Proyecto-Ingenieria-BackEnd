@@ -12,7 +12,11 @@ import {
     getEstudiantesCentro,
     getMiembrosGrupo,
     eliminarContacto,
-    getMensajes
+    getMensajes,
+    envioArchivos,contEnvioArchivos,
+    getMensajesGrupo,
+    envioArchivosGrupo,contEnvioArchivosGrupo,
+    nuevoChat
 } from '../controllers/chat.controller.js';
 
 const router = express.Router();
@@ -30,5 +34,9 @@ router.post('/getEstudiantesCentro', getEstudiantesCentro);
 router.post('/getMiembrosGrupo', getMiembrosGrupo);
 router.post('/eliminarContacto', eliminarContacto);
 router.post('/getMensajes', getMensajes);
+router.post('/envioArchivos', contEnvioArchivos ,envioArchivos);
+router.post('/getMensajesGrupo', getMensajesGrupo);
+router.post('/envioArchivosGrupo', contEnvioArchivosGrupo ,envioArchivosGrupo);
+router.post('/nuevoChat', nuevoChat);
 
 export default router;
